@@ -15,6 +15,8 @@ class Customers(object):
         self._budget = float(0)
         
     def printinfo(self):
+        # since new reserve will be converted into or out the kenny coin, the budget could change
+        # when print info, update the budget
         oldownedValue = self._ownedvalue
         self._ownedvalue = self._smartToken._Price * self._ownedSmartToken + self._reserveValue
         self._budget = self._budget + self._ownedvalue - oldownedValue
@@ -22,33 +24,38 @@ class Customers(object):
         print 'smartToken Name:', self._smartToken._Name
         print 'ownedvalue:', self._ownedvalue, 'budget:', self._budget
         
-    def purchase(self, TokenNumber):
+    def getReserveValue(self):
+        return self._reserveValue
+        
+    def purchase(self, reserveTokenNumber):
         oldPrice = self._smartToken._Price
-        if oldPrice * TokenNumber > self._reserveValue:
+        if reserveTokenNumber > self._reserveValue:
             print 'Invalid Operation in Purchase'
             return
-        self._ownedSmartToken = self._ownedSmartToken + TokenNumber
-        self._reserveValue = self._reserveValue - oldPrice * TokenNumber
-        # smartToken.purchasing means being purchased
-        self._smartToken.purchasing(TokenNumber)
-        newPrice = self._smartToken._Price
+        # smartToken.purchasing means being converted
+        issuedSmartToken = self._smartToken.purchasing(reserveTokenNumber)
+        newPrice = self._smartToken._Price      
+        self._ownedSmartToken = self._ownedSmartToken + issuedSmartToken
         self._smartValue = self._ownedSmartToken * newPrice
+        self._reserveValue = self._reserveValue - reserveTokenNumber
+        # in fact, in this case ownedValue and budget actually does not change at all
         oldownedValue = self._ownedvalue
         self._ownedvalue = self._reserveValue + self._smartValue
         self._budget = self._budget + self._ownedvalue - oldownedValue
         
         
-    def destroy(self, TokenNumber):
+    def destroy(self, smartTokenNumber):
         oldPrice = self._smartToken._Price
-        if self._ownedSmartToken < TokenNumber:
+        if self._ownedSmartToken < smartTokenNumber:
             print 'Invalid Operation in Destroy'
             return
-        self._ownedSmartToken = self._ownedSmartToken - TokenNumber
-        self._reserveValue = self._reserveValue + oldPrice*TokenNumber
+        self._ownedSmartToken = self._ownedSmartToken - smartTokenNumber
         # smartToken.purchasing means being purchased
-        self._smartToken.destroying(TokenNumber)
+        ReceivedToken = self._smartToken.destroying(smartTokenNumber)
         newPrice = self._smartToken._Price
         self._smartValue = self._ownedSmartToken*newPrice
+        self._reserveValue = self._reserveValue + ReceivedToken
+        # In fact, in this case ownedValue actually does not change at all
         oldownedValue = self._ownedvalue
         self._ownedvalue = self._reserveValue + self._smartValue
         self._budget = self._budget + self._ownedvalue - oldownedValue

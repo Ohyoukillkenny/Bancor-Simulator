@@ -7,7 +7,7 @@ class Smartcoin(object):
 		self._Price = float(initPrice)
 		self._Supply = float(initIssueNum)
 		self._ReserveBalance = float(initCRR * initIssueNum)
-		self._budget = float(0)
+		self._budget = float(0)     
 
 	def printInfo(self):
 		print '---------'
@@ -15,11 +15,11 @@ class Smartcoin(object):
 		print 'PRICE:',self._Price
 		print 'SUPPLY:', self._Supply, '| RESERVE BALANCE:', self._ReserveBalance
 		print 'BUDGET:', self._budget
-
+        
 	def updatePrice(self, reserveBalance, supply, CRR):
 		newPrice = reserveBalance/(supply * CRR)
 		return newPrice
-
+    
 	def setCRR(self, newCRR = 0.5):
 		oldCRR = self._CRR
 		self._CRR = newCRR
@@ -29,6 +29,7 @@ class Smartcoin(object):
 		return self._Price
 
 	def purchasing(self, convertIntoNum=0):
+		# ETH be convert into BNT
 		issuedtokenNum = self._Supply * (((self._ReserveBalance + convertIntoNum)/self._ReserveBalance)**(self._CRR) - 1)
 		self._Supply = self._Supply + issuedtokenNum
 		self._ReserveBalance = self._ReserveBalance + convertIntoNum
@@ -36,21 +37,25 @@ class Smartcoin(object):
 		self._Price = self.updatePrice(self._ReserveBalance, self._Supply, self._CRR)
 		increaseRatio = (self._Price - oldPrice)/oldPrice
 		print '*********'
-		print convertIntoNum, self._ReservetokenName+" convert into "+self._Name
-		print "Current prize of "+self._Name+" is", self._Price, "with", increaseRatio, "increasing."
+		print round(convertIntoNum,2), self._ReservetokenName+" be converted into as", round(issuedtokenNum,2), self._Name
+		print "Current prize of "+self._Name+" is", self._Price, "with", round(increaseRatio*100,4), "% increasing."
 		self._budget = self._budget + self._Price*self._Supply - oldPrice*(self._Supply - issuedtokenNum)
+		return issuedtokenNum
 
 	def destroying(self, convertOutNum=0):
-		destroyedtokenNum = self._Supply * (1 - ((self._ReserveBalance - convertOutNum)/self._ReserveBalance)**(self._CRR))
+		# BNT be converted out to ETH
+		destroyedtokenNum = convertOutNum      
+		reserveReceivedNum = self._ReserveBalance*(1 - ((self._Supply - convertOutNum)/self._Supply)**(1/self._CRR))
 		self._Supply = self._Supply - destroyedtokenNum
-		self._ReserveBalance = self._ReserveBalance - convertOutNum
+		self._ReserveBalance = self._ReserveBalance - reserveReceivedNum
 		oldPrice = self._Price
 		self._Price = self.updatePrice(self._ReserveBalance, self._Supply, self._CRR)
 		decreaseRatio = (oldPrice-self._Price)/oldPrice
 		print '*********'
-		print convertOutNum, self._ReservetokenName+" convert out from "+self._Name
-		print "Current prize of "+self._Name+" is", self._Price, "with", decreaseRatio, "decreasing."
+		print round(convertOutNum,2), self._Name+" be converted out as", round(reserveReceivedNum,2), self._ReservetokenName
+		print "Current prize of "+self._Name+" is", self._Price, "with", round(decreaseRatio*100,4), "% decreasing."
 		self._budget = self._budget + self._Price*self._Supply - oldPrice*(self._Supply + destroyedtokenNum)
+		return reserveReceivedNum
 
 def smarttoken_main():
 	''' 
@@ -63,7 +68,7 @@ def smarttoken_main():
 	BNTCoin.printInfo()
 	BNTCoin.purchasing(700)
 	BNTCoin.printInfo()
-	BNTCoin.destroying(1308)
+	BNTCoin.destroying(1302)
 	BNTCoin.printInfo()
 	BNTCoin.purchasing(100)
 	BNTCoin.printInfo()
