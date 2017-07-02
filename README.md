@@ -1,6 +1,6 @@
 ### Bancor-Simulator
 
-![Bancor icon](https://i.ytimg.com/vi/MKZz775lXV8/maxresdefault.jpg)
+![Bancor icon](https://cdn-images-1.medium.com/max/600/1*0u59V1q5pcP5f1fArOkF1g.jpeg)
 
 # We build a simulator of Bancor, which helps to explain the difference between Bancor market and real-world market.
 
