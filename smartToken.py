@@ -36,9 +36,9 @@ class Smartcoin(object):
 		oldPrice = self._Price
 		self._Price = self.updatePrice(self._ReserveBalance, self._Supply, self._CRR)
 		increaseRatio = (self._Price - oldPrice)/oldPrice
-		print '*********'
+		print '&&&&&&&&&&'
 		print round(convertIntoNum,2), self._ReservetokenName+" be converted into as", round(issuedtokenNum,2), self._Name
-		print "Current prize of "+self._Name+" is", self._Price, "with", round(increaseRatio*100,4), "% increasing."
+# 		print "Current price of "+self._Name+" is", self._Price, "with", round(increaseRatio*100,4), "% increasing."
 		self._budget = self._budget + self._Price*self._Supply - oldPrice*(self._Supply - issuedtokenNum)
 		return issuedtokenNum
 
@@ -51,9 +51,9 @@ class Smartcoin(object):
 		oldPrice = self._Price
 		self._Price = self.updatePrice(self._ReserveBalance, self._Supply, self._CRR)
 		decreaseRatio = (oldPrice-self._Price)/oldPrice
-		print '*********'
+		print '**********'
 		print round(convertOutNum,2), self._Name+" be converted out as", round(reserveReceivedNum,2), self._ReservetokenName
-		print "Current prize of "+self._Name+" is", self._Price, "with", round(decreaseRatio*100,4), "% decreasing."
+# 		print "Current price of "+self._Name+" is", self._Price, "with", round(decreaseRatio*100,4), "% decreasing."
 		self._budget = self._budget + self._Price*self._Supply - oldPrice*(self._Supply + destroyedtokenNum)
 		return reserveReceivedNum
 

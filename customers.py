@@ -1,18 +1,20 @@
 from smartToken import *
 
 class Customers(object):
-    def __init__(self, smartToken, smartValue = 0, reserveValue = 500):
+    def __init__(self, smartToken, ownedSmartTokens = float(0), reserveValue = float(500),expectedPrice = 0):
         # _smartToken is the token customers want to buy -- SmartToken()
         self._smartToken = smartToken
         # _ownedSmartToken refers to smart token's number customers have
-        self._ownedSmartToken = float(0)
-        # _smartValue is the value of ownedSmartTokens -- currentPrize * owned#
-        self._smartValue = float(0)
+        self._ownedSmartToken = float(ownedSmartTokens)
+        # _smartValue is the value of ownedSmartTokens -- currentPrice * owned#
+        self._smartValue = smartToken.getPrice() * ownedSmartTokens
         self._reserveValue = float(reserveValue)
         # _ownedvalue = _reserveValue + _smartValue
         self._ownedvalue = float(reserveValue)
         # gain or lose money comparing to the original state
         self._budget = float(0)
+        # expectedPrice denotes the how much money customers are willing to finish the transaction 
+        self._expectedPrice = expectedPrice
         
     def printinfo(self):
         # since new reserve will be converted into or out the kenny coin, the budget could change
@@ -26,6 +28,21 @@ class Customers(object):
         
     def getReserveValue(self):
         return self._reserveValue
+    def getownedSmartToken(self):
+        return self._ownedSmartToken
+    
+    # add customer's reserve amount
+    def addReserve(self, addAmount):
+        self._reserveValue = self._reserveValue + addAmount
+        self._ownedvalue = self._smartToken._Price * self._ownedSmartToken + self._reserveValue
+    
+    # returned expected Price
+    def getExpectedPrice(self):
+        return self._expectedPrice
+        
+    # change the expected price
+    def changeExpectedPrice(self, newExpectedPrice):
+        self._expectedPrice = newExpectedPrice
         
     def purchase(self, reserveTokenNumber):
         oldPrice = self._smartToken._Price
