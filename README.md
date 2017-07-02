@@ -14,6 +14,6 @@
 1. *Failure* file contains figures about failure rate of transaction.
 2. *Price* file contains figures about the shifting price of the Smarttoken with the time.
 3. *Transaction-Record.txt* records the information of smarkToken during transactions.
-4. *gaussian.py* and *gaussian-price.ipynb* is just the test for gaussian function. Please ignore them.
+4. *gaussian.py* and *gaussian-price.ipynb* are just the codes for gaussian function testing. Please ignore them.
 
 
