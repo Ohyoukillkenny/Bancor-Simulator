@@ -15,6 +15,12 @@ class Smartcoin(object):
 		print 'PRICE:',self._Price
 		print 'SUPPLY:', self._Supply, '| RESERVE BALANCE:', self._ReserveBalance
 		print 'BUDGET:', self._budget
+		
+	def saveInfo(self, fw):
+		fw.write('---------\n')
+		fw.write('NAME: '+str(self._Name)+' | RESERVE NAME: '+str(self._ReservetokenName) + ' | CRR: '+str(self._CRR)+'\n')
+		fw.write('PRICE: '+str(self._Price))
+		fw.write('SUPPLY: '+str(self._Supply)+' | RESERVE BALANCE: '+str(self._ReserveBalance)+'\n')
         
 	def updatePrice(self, reserveBalance, supply, CRR):
 		newPrice = reserveBalance/(supply * CRR)
