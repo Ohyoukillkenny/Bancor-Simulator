@@ -155,7 +155,7 @@ while j < TimeRound:
         myX.append(i+1)
         Price_eachRound.append(PriceTracker[i+j*custNum][0])
         i = i + 1
-    PriceAllRound.append(Price_eachRound[99])
+    PriceAllRound.append(Price_eachRound[custNum-1])
     x = np.asarray(myX)
     y = np.asarray(Price_eachRound)
     plt.plot(x,y,'o',color = 'navy',alpha = 0.8)
