@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import matplotlib.mlab as mlab
 fw = open('Transaction-Record.txt','w')
 
-def MarketSimulating(_timeRound, _custNum, _custOriginalReserve, _custOriginalSmartTokens):
+def MarketSimulating(_timeRound, _custNum, _custOriginalReserve, _custOriginalSmartTokens, _sigma):
     # issue a new smart token
     initIssue = 300000
     CRR = 0.2
@@ -27,6 +27,8 @@ def MarketSimulating(_timeRound, _custNum, _custOriginalReserve, _custOriginalSm
     custNum = _custNum
     custOriginalReserve = _custOriginalReserve
     custOriginalSmartTokens = _custOriginalSmartTokens
+    sigma = _sigma
+
     if TimeRound * custOriginalSmartTokens > initTransaction:
         print 'WARNING, too many init smart tokens from customers'
 
@@ -45,8 +47,7 @@ def MarketSimulating(_timeRound, _custNum, _custOriginalReserve, _custOriginalSm
         failed_buyNum = 0
         failed_sellNum = 0
         buyNum = 0
-        sellNum = 0
-        
+        sellNum = 0        
         i=0
         custlist = []
         CurrentPrice = KennyCoin.getPrice()
@@ -59,7 +60,6 @@ def MarketSimulating(_timeRound, _custNum, _custOriginalReserve, _custOriginalSm
         Since we get customers #custNum involved, the normal should be sampled by custNum.
         '''
         mu = initPrice
-        sigma = 0.1
         np.random.seed(0)
         custExpectedPrice = np.random.normal(mu, sigma, custNum)
         while i < custNum:
@@ -110,7 +110,7 @@ def MarketSimulating(_timeRound, _custNum, _custOriginalReserve, _custOriginalSm
         fw.write('After Round '+ str(j) + '\n')
         KennyCoin.saveInfo(fw)
         j = j + 1
-    fw.close()
+    # fw.close()
 
     # draw failure rate fig
     j = 0
@@ -160,16 +160,17 @@ def MarketSimulating(_timeRound, _custNum, _custOriginalReserve, _custOriginalSm
             Price_eachRound.append(PriceTracker[i+j*custNum][0])
             i = i + 1
         PriceAllRound.append(Price_eachRound[custNum-1])
-        x = np.asarray(myX)
-        y = np.asarray(Price_eachRound)
-        plt.plot(x,y,'o-',color = 'navy',alpha = 0.8)
-        plt.title('Price Change in Round \"'+str(j)+'\"',fontsize = 25)
-        plt.xlabel('Customer #',fontsize = 15)
-        plt.ylabel('Price of Smart Token', fontsize = 15)
-        plt.savefig('Price/PriceRound/Price_inRound'+str(j)+'.png', bbox_inches='tight')
-        plt.close()
+        if _timeRound <= 150:
+            x = np.asarray(myX)
+            y = np.asarray(Price_eachRound)
+            plt.plot(x,y,'o-',color = 'navy',alpha = 0.8)
+            plt.title('Price Change in Round \"'+str(j)+'\"',fontsize = 25)
+            plt.xlabel('Customer #',fontsize = 15)
+            plt.ylabel('Price of Smart Token', fontsize = 15)
+            plt.savefig('Price/PriceRound/Price_inRound'+str(j)+'.png', bbox_inches='tight')
+            plt.close()
+            print 'Price Change Fig, Round '+str(j)+' Over...'
         my_Xall.append(j)
-        print 'Price Change Fig, Round '+str(j)+' Over...'
         j = j + 1
     allX = np.asarray(my_Xall)
     ally = np.asarray(PriceAllRound)
@@ -325,10 +326,11 @@ class Smartcoin(object):
 class Example(QtGui.QWidget):
     def __init__(self):
         super(Example, self).__init__()
-        self._timeRound = float(0)
-        self._custNum = float(0)
+        self._timeRound = int(0)
+        self._custNum = int(0)
         self._custOriginalReserve = float(-1)
         self._custOriginalSmartTokens = float(-1)
+        self._sigma = float(0)
         self.initUI()
         
     def initUI(self): 
@@ -361,42 +363,58 @@ class Example(QtGui.QWidget):
         self.lbl4 = QtGui.QLabel(self)
         self.lbl4.move(450, 40)
 
+        self.label5 = QtGui.QLabel(self)   
+        self.label5.move(40, 60)
+        self.label5.setText('Sigma:')
+
+        self.lbl5 = QtGui.QLabel(self)
+        self.lbl5.move(200, 60)
+
         self.label_qle1 = QtGui.QLabel(self)   
-        self.label_qle1.move(40, 70)
+        self.label_qle1.move(40, 90)
         self.label_qle1.setText('Rounds Input:')
 
         # receive the input of Time Round
         qle1 = QtGui.QLineEdit(self)
-        qle1.move(350, 70)
+        qle1.move(350, 90)
         qle1.textChanged[str].connect(self.onChanged_qle1)
 
         self.label_qle2 = QtGui.QLabel(self)   
-        self.label_qle2.move(40, 100)
+        self.label_qle2.move(40, 120)
         self.label_qle2.setText('#Customers Input:')
 
         # receive the input of Customers in
         qle2 = QtGui.QLineEdit(self)
-        qle2.move(350, 100)
+        qle2.move(350, 120)
         qle2.textChanged[str].connect(self.onChanged_qle2)
 
         
         self.label_qle3 = QtGui.QLabel(self)   
-        self.label_qle3.move(40, 130)
+        self.label_qle3.move(40, 150)
         self.label_qle3.setText('Cust Init Reserve:')
 
         # receive the input of cust original reserve
         qle3 = QtGui.QLineEdit(self)
-        qle3.move(350, 130)
+        qle3.move(350, 150)
         qle3.textChanged[str].connect(self.onChanged_qle3)
 
         self.label_qle4 = QtGui.QLabel(self)   
-        self.label_qle4.move(40, 160)
+        self.label_qle4.move(40, 180)
         self.label_qle4.setText('Cust Init SmartToken:')
 
         # receive the input of Cust original smartTokens
         qle4 = QtGui.QLineEdit(self)
-        qle4.move(350, 160)
+        qle4.move(350, 180)
         qle4.textChanged[str].connect(self.onChanged_qle4)
+
+        self.label_qle5 = QtGui.QLabel(self)   
+        self.label_qle5.move(40, 210)
+        self.label_qle5.setText('Gaussian Sigma:')
+
+        # receive the input of Cust original smartTokens
+        qle5 = QtGui.QLineEdit(self)
+        qle5.move(350, 210)
+        qle5.textChanged[str].connect(self.onChanged_qle5)
 
         # # time bar
         # self.pbar = QtGui.QProgressBar(self)
@@ -405,15 +423,15 @@ class Example(QtGui.QWidget):
         self.step = 0
 
         self.btn = QtGui.QPushButton('Start', self)
-        self.btn.move(100, 220)
+        self.btn.move(100, 250)
         self.btn.clicked.connect(self.doAction)
 
         self.qbtn = QtGui.QPushButton('Quit', self)
-        self.qbtn.move(300, 220)
+        self.qbtn.move(300, 250)
         self.qbtn.clicked.connect(QtCore.QCoreApplication.instance().quit)
         
         self.label_status = QtGui.QLabel(self)   
-        self.label_status.move(20, 480)
+        self.label_status.move(790, 280)
         # self.label_status.setText('Ready!')
 
         mylabel = QtGui.QLabel(self)
@@ -456,7 +474,7 @@ class Example(QtGui.QWidget):
     # get cust Original Reserve
     def onChanged_qle3(self, text):
         try:
-            self._custOriginalReserve = int(text)
+            self._custOriginalReserve = float(text)
         except Exception as e:
             self.lbl3.setText('WARNING: Input is not digit!')
             self.lbl3.adjustSize()
@@ -467,13 +485,24 @@ class Example(QtGui.QWidget):
     # get cust Original SmartTokens
     def onChanged_qle4(self, text):
         try:
-            self._custOriginalSmartTokens = int(text)
+            self._custOriginalSmartTokens = float(text)
         except Exception as e:
             self.lbl4.setText('WARNING: Input is not digit!')
             self.lbl4.adjustSize()
             return
         self.lbl4.setText(text)
         self.lbl4.adjustSize()
+
+    # get Gaussian's init Sigma
+    def onChanged_qle5(self, text):
+        try:
+            self._sigma = float(text)
+        except Exception as e:
+            self.lbl5.setText('WARNING: Input is not digit!')
+            self.lbl5.adjustSize()
+            return
+        self.lbl5.setText(text)
+        self.lbl5.adjustSize()
 
     def timerEvent(self, e):
       
@@ -489,20 +518,21 @@ class Example(QtGui.QWidget):
 
     def doAction(self):
     	self.label_status.setText('Running ...')
-        if (self._timeRound == float(0)) or (self._custNum == float(0)) or (self._custOriginalReserve == float(-1)) or (self._custOriginalSmartTokens == float(-1)):
+        if (self._timeRound == int(0)) or (self._custNum == int(0)) or (self._custOriginalReserve == float(-1)) or (self._custOriginalSmartTokens == float(-1) or (self._sigma == float(0))):
             print "Error, Lack of Input! "
             self.label_status.setText('Ready!')
             return
-        # self.timer.start(100, self)
-        # still don't know why these syntax doesn't work
-        MarketSimulating(self._timeRound, self._custNum, self._custOriginalReserve, self._custOriginalSmartTokens)
-        self.label_status.setText('Ready!')
-
-        pixmap_Price = QtGui.QPixmap(os.getcwd() + '/Price/Price_Change.png')
-        self.myimg_Price.setPixmap(pixmap_Price)
-
-        pixmap_Failure = QtGui.QPixmap(os.getcwd() + '/Failure/FailureRate-All.png')
-        self.myimg_Price.setPixmap(pixmap_Failure)
+        # self.timer.start(100, self)        
+        MarketSimulating(self._timeRound, self._custNum, self._custOriginalReserve, self._custOriginalSmartTokens, self._sigma)
+        
+        '''
+        still don't know why these syntax doesn't work
+        '''
+        # self.label_status.setText('Ready!')
+        # pixmap_Price = QtGui.QPixmap(os.getcwd() + '/Price/Price_Change.png')
+        # self.myimg_Price.setPixmap(pixmap_Price)
+        # pixmap_Failure = QtGui.QPixmap(os.getcwd() + '/Failure/FailureRate-All.png')
+        # self.myimg_Price.setPixmap(pixmap_Failure)
 
         os.system('xdg-open '+os.getcwd() + '/Price/Price_Change.png')
         os.system('xdg-open '+os.getcwd() + '/Failure/FailureRate-All.png')
