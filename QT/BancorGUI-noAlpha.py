@@ -51,6 +51,7 @@ def MarketSimulating(_timeRound, _custNum, _custOriginalReserve, _custOriginalSm
         i=0
         custlist = []
         CurrentPrice = KennyCoin.getPrice()
+        OldPrice = CurrentPrice
         # set the expectation of initPrice (first we fix it), Should it change with time ?
         initPrice = CurrentPrice
         ''' 
@@ -62,42 +63,58 @@ def MarketSimulating(_timeRound, _custNum, _custOriginalReserve, _custOriginalSm
         mu = initPrice
         custExpectedPrice = np.random.normal(mu, sigma, custNum)
         while i < custNum:
-    #         # the customer's expected price should not lower than the currentPrice since every one want to achieve the transaction
-    #         if custExpectedPrice[i] <= CurrentPrice:
-    #             np.random.seed(0)
-    #             change_delta = random.uniform(0,0.001)
-    #             custExpectedPrice[i] = CurrentPrice * (1 + change_delta)
-            # create Joe who is the customer who want to hold KennyCoin, with expected Buy and Sell Price custExpectedPrice
             Joe = Customers(smartToken = KennyCoin, ownedSmartTokens = custOriginalSmartTokens, reserveValue = custOriginalReserve, expectedPrice = custExpectedPrice[i])
             custlist.append(Joe)
             i = i + 1
         for Joe in custlist:
-            # uses seed to let the purchase or sell happen randomly by a certain ratio
-            seed = random.randint(0, 100)
-            if seed < alpha:
+            if Joe.getExpectedPrice() > OldPrice:
                 buyNum = buyNum + 1
                 if Joe.getExpectedPrice() >= KennyCoin.getPrice():
-                    # Joe is purchasing
+                    # Joe purchases successfully
                     custReserve = Joe.getReserveValue()
                     randomBuy = random.uniform(0,custReserve)
                     Joe.purchase(reserveTokenNumber = randomBuy)
                 else:
-                    '''
-                    Customers are smart, and already know the price.
-                    No one will expect price lower than the standard prize?
-                    Here this situation is simulated in BancorGUI-noAlpha.py
-                    '''
+                    # failed in buying
                     failed_buyNum = failed_buyNum + 1
-                    
-            else:
+            elif Joe.getExpectedPrice() < OldPrice:
                 sellNum = sellNum + 1
                 if Joe.getExpectedPrice() <= KennyCoin.getPrice():
-                    # Joe is selling
+                    # Joe sells successfully
                     custSmartToken_Num = Joe.getownedSmartToken()
                     randomSell = random.uniform(0,custSmartToken_Num)
                     Joe.destroy(smartTokenNumber = randomSell)
                 else:
+                    # failed in selling
                     failed_sellNum = failed_sellNum + 1
+            else:
+                '''
+                This case means:
+                  Joe.getExpectedPrice() == OldPrice,
+                Then we need to throw a coin to determine whether to buy or sell,
+                  half - half possibility
+                '''
+                seed = random.randint(0, 100)
+                if seed < 50:
+                    buyNum = buyNum + 1
+                    if Joe.getExpectedPrice() >= KennyCoin.getPrice():
+                        # Joe purchases successfully
+                        custReserve = Joe.getReserveValue()
+                        randomBuy = random.uniform(0,custReserve)
+                        Joe.purchase(reserveTokenNumber = randomBuy)
+                    else:
+                        # failed in buying
+                        failed_buyNum = failed_buyNum + 1
+                else:
+                    sellNum = sellNum + 1
+                    if Joe.getExpectedPrice() <= KennyCoin.getPrice():
+                        # Joe sells successfully
+                        custSmartToken_Num = Joe.getownedSmartToken()
+                        randomSell = random.uniform(0,custSmartToken_Num)
+                        Joe.destroy(smartTokenNumber = randomSell)
+                    else:
+                        # failed in selling
+                        failed_sellNum = failed_sellNum + 1
             CurrentPrice = KennyCoin.getPrice()
             PriceTracker.append((CurrentPrice,j))
         print 'The',j,'round, BuyNum:',buyNum,'SellNum:',sellNum
@@ -158,7 +175,7 @@ def MarketSimulating(_timeRound, _custNum, _custOriginalReserve, _custOriginalSm
             Price_eachRound.append(PriceTracker[i+j*custNum][0])
             i = i + 1
         PriceAllRound.append(Price_eachRound[custNum-1])
-        if _timeRound <= 150:
+        if _timeRound <= 50:
             x = np.asarray(myX)
             y = np.asarray(Price_eachRound)
             plt.plot(x,y,'o-',color = 'navy',alpha = 0.8)
