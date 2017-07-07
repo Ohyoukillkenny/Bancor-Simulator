@@ -11,7 +11,7 @@ fw = open('Transaction-Record.txt','w')
 
 def MarketSimulating(_timeRound, _custNum, _custOriginalReserve, _custOriginalSmartTokens, _sigma):
     # issue a new smart token
-    initIssue = 300000
+    initIssue = 20000000
     CRR = 0.2
     initTransaction = initIssue * (1-CRR)
     KennyCoin = Smartcoin(name='Kenny',reservetokenName='ETH',initCRR=0.2, initPrice=1,initIssueNum=initIssue)

@@ -25,12 +25,15 @@ def MarketSimulating(_timeRound, _custNum, _custOriginalReserve, _custOriginalSm
     '''
     TimeRound = _timeRound
     custNum = _custNum
-    custOriginalReserve = _custOriginalReserve
-    custOriginalSmartTokens = _custOriginalSmartTokens
     sigma = _sigma
+    custOriginalReserve_mu = _custOriginalReserve
+    custOriginalSmartTokens_mu = _custOriginalSmartTokens
 
-    if TimeRound * custOriginalSmartTokens > initTransaction:
+    if TimeRound * TimeRound * custOriginalSmartTokens_mu > initTransaction:
         print 'WARNING, too many init smart tokens from customers'
+        if TimeRound * TimeRound * custOriginalSmartTokens_mu> initIssue:
+            print 'ERROR, too many init smart tokens'
+            turndown = 1 + 'klk'
 
     # PriceTracker records the change of the price
     PriceTracker = []
@@ -38,8 +41,6 @@ def MarketSimulating(_timeRound, _custNum, _custOriginalReserve, _custOriginalSm
     failedBuy_rateTracker = []
     failedSell_rateTracker = []
     failed_rateTracker = []
-
-    alpha = 50 # 50% to buy, 50% to sell
     j=0
     while j < TimeRound:
         # failed num denotes the number of transactions failed in each time round
@@ -62,8 +63,10 @@ def MarketSimulating(_timeRound, _custNum, _custOriginalReserve, _custOriginalSm
         '''
         mu = initPrice
         custExpectedPrice = np.random.normal(mu, sigma, custNum)
+        custOriginalReserve = np.random.normal(custOriginalReserve_mu, 0.5, custNum) # 0.5 is sigma
+        custOriginalSmartTokens = np.random.normal(custOriginalSmartTokens_mu, 0.5, custNum) # 0.5 is sigma
         while i < custNum:
-            Joe = Customers(smartToken = KennyCoin, ownedSmartTokens = custOriginalSmartTokens, reserveValue = custOriginalReserve, expectedPrice = custExpectedPrice[i])
+            Joe = Customers(smartToken = KennyCoin, ownedSmartTokens = custOriginalSmartTokens[i], reserveValue = custOriginalReserve[i], expectedPrice = custExpectedPrice[i])
             custlist.append(Joe)
             i = i + 1
         for Joe in custlist:
