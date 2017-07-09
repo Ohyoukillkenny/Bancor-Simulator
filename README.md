@@ -13,7 +13,7 @@
 ## How to run
 ### Here we give three ways to view how Bancor protocol works.
 
-1. *Recommended*, run **Bancor-Simulating.ipynb** and **Bancor-Simulating-noalpha.ipynb** in ipython notebook, then follow the comments.
+1. *Recommended*, run **BNew-Bancor-Simulator.ipynb** in ipython notebook, then follow the comments.
 2. *For Results*, run **BancorGUI.py** or **BancorGUI-noAlpha.py** in file QT, by inputting parameters to GUI.
 3. Run **marketsimulator.py** in python. The customers.py presents the python class for customer simulating, the smartToken.py is the python class for smartToken in Bancor market, which includes the Bancor protocol.
 
