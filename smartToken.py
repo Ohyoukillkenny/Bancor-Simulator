@@ -12,8 +12,8 @@ class Smartcoin(object):
 		self._ReservetokenName = reservetokenName
 		self._CRR = float(initCRR)
 		self._Price = float(initPrice)
-		self._Supply = int(initIssueNum) # according to the white paper
-		self._ReserveBalance = float(initCRR * initIssueNum)
+		self._Supply = float(initIssueNum)
+		self._ReserveBalance = float(initCRR*initIssueNum)
 
 	def printInfo(self):
 		print '---------'
@@ -52,8 +52,8 @@ class Smartcoin(object):
 
 	def destroying(self, convertOutNum=0):
 		# e.g., BNT be converted out to ETH, convertOutNum is BNT's num
-		destroyedtokenNum = convertOutNum      
-		reserveReceivedNum = round(self._ReserveBalance*(1 - ((self._Supply - convertOutNum)/self._Supply)**(1/self._CRR)))
+		destroyedtokenNum = convertOutNum
+		reserveReceivedNum = round(self._ReserveBalance*(1 - ((self._Supply - convertOutNum) / self._Supply) ** (1/self._CRR)))
 		self._Supply = self._Supply - destroyedtokenNum
 		self._ReserveBalance = self._ReserveBalance - reserveReceivedNum
 		# update the price after destroying, e.g. BNT convert into ETH (cust sell bnt to get eth)
@@ -69,6 +69,7 @@ def smarttoken_main():
 	'''
 	BNTCoin = Smartcoin(name='BNT',reservetokenName='ETH',initCRR=0.2, initPrice=1,initIssueNum=300000)
 	BNTCoin.printInfo()
+	print BNTCoin.destroying(300)
 	print BNTCoin.purchasing(300)
 	print BNTCoin.purchasing(700)
 	BNTCoin.printInfo()

@@ -55,6 +55,9 @@ class Customers(object):
     call smartTokens.purchasing() function
     '''
     def buy(self, reserveTokenNumber):
+        if reserveTokenNumber < 0:
+            print '** ERROR, cannot buy negative number of smartToken'
+            return
         if reserveTokenNumber > self._reserveTokens:
             print '** ERROR, invalid Operation in buy'
             return
@@ -72,6 +75,9 @@ class Customers(object):
     call smartTokens.destroying() function
     '''        
     def sell(self, smartTokenNumber):
+        if smartTokenNumber < 0:
+            print '** ERROR, cannot sell negative number of smartToken'
+            return
         if self._ownedSmartTokens < smartTokenNumber:
             print '** ERROR, invalid Operation in sell'
             return

@@ -13,14 +13,11 @@
 ## How to run
 ### Here we give three ways to view how Bancor protocol works.
 
-1. *Recommended*, run **BNew-Bancor-Simulator.ipynb** in ipython notebook, then follow the comments.
-2. *For Results*, run **BancorGUI.py** or **BancorGUI-noAlpha.py** in file QT, by inputting parameters to GUI.
-3. Run **marketsimulator.py** in python. The customers.py presents the python class for customer simulating, the smartToken.py is the python class for smartToken in Bancor market, which includes the Bancor protocol.
+1. *Recommended*, run **New-Bancor-Simulator.ipynb** in ipython notebook, then follow the comments.
+2. *For Results*, run **BancorGUI.py** or **BancorGUI-noAlpha.py** in file QT, by inputting parameters to GUI. (Old Version)
+3. Run **main.py** in python. The customers.py presents the python class for customer simulating, the smartToken.py is the python class for smartToken in Bancor market, which includes the Bancor protocol.
 
 ## Other documents
 
-1. **Failure** file contains figures about failure rate of transaction.
-2. **Price** file contains figures about the shifting price of the Smarttoken with the time.
-3. **Transaction-Record.txt** records the information of smarkToken during transactions.
-4. **gaussian.py** and **gaussian-price.ipynb** are just codes for gaussian function testing. Please ignore them.
-5. **QT** file contains GUI codes for Bancor simulator as well as figures and txt file which tracks information in simulating.
+1. **Figures** file contains figures and results of simulating.
+2. **QT** file contains GUI codes for Bancor simulator as well as figures and txt file which tracks information in simulating.
