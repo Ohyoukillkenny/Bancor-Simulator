@@ -1,23 +1,25 @@
 from smartToken import *
 
-class Customers(object):
+class Customer(object):
     '''
-    _smartToken: the token customers want to buy -- SmartToken()
-    _ownedSmartToken: smart token's number customers have, being rounded as whitepaper
-    _reserveTokens: reserve token's number customers have, being rounded as whitepaper
-    _ownedvalue = _reserveValue + _smartValue: the total money cust has, using reserveToken as measurement
-    _originalMoney: original money cust has
-    _moneyBalance: value of money gained or lost, comparing to the original state
-    _expectedPrice: how much money customers are willing to finish the transaction
+    _smartToken: class of the token customers want to buy or sell -- SmartToken()
+    _market: instance of the market customers buy or sell 
+
+    _valuation: how much money customers are willing to finish the transaction
+    _tokenBalance: number of smart tokens a customer has
+    _reserveBalance: number of reserve tokens a customer has
+
+    _originalCash: original money cust has
+    _cash: net profit or loss to date
     '''
-    def __init__(self, smartToken, ownedSmartTokens = 0, reserveTokens = 0, expectedPrice = 0):
+    def __init__(self, smartToken, ownedSmartTokens = 0, reserveTokens = 0, valuation = 0.0):
         self._smartToken = smartToken
-        self._ownedSmartTokens = int(ownedSmartTokens)
+        self._ownedSmartTokens = 0
         self._reserveTokens = int(reserveTokens)
-        self._ownedvalue = float(smartToken.getPrice() * self._ownedSmartTokens + self._reserveTokens * 1)
-        self._originalMoney = self._ownedvalue
-        self._moneyBalance = float(0)
-        self._expectedPrice = float(expectedPrice)
+
+        self._originalCash = self._reserveTokens
+        self._cash = 0.0
+        self._valuation = valuation
         
     def printinfo(self):
         # since new reserve will be converted into or out the smarttoken, Price will change
@@ -25,30 +27,40 @@ class Customers(object):
         self._ownedvalue = float(self._smartToken.getPrice() * self._ownedSmartTokens + self._reserveTokens * 1)
         self._moneyBalance = self._ownedvalue - self._originalMoney
         print '------'
-        print 'smartToken Name:', self._smartToken._Name, '| expected price:', self._expectedPrice
+        print 'smartToken Name:', self._smartToken._Name, '| expected price:', self._valuation
         print 'ownedvalue:', self._ownedvalue, '| money Balance:', self._moneyBalance
+
     def getReserveTokens(self):
         return self._reserveTokens
+
     def getownedSmartTokens(self):
         return self._ownedSmartTokens
+
     def getmoneyBalance(self):
         self._ownedvalue = float(self._smartToken.getPrice() * self._ownedSmartTokens + self._reserveTokens * 1)
         self._moneyBalance = self._ownedvalue - self._originalMoney
         return self._moneyBalance
+
     def getExpectedPrice(self):
-        return self._expectedPrice
-    # add customer's reserve amount
-    def addReserve(self, addAmount):
-        if isinstance(addAmount,int):
-            self._reserveTokens = self._reserveTokens + addAmount
-            self._ownedvalue = float(self._smartToken.getPrice() * self._ownedSmartTokens + self._reserveTokens * 1)
-            # this part money is independant with bancor balance
-            self._originalMoney = self._originalMoney + addAmount * 1
-        else:
-            print "** ERROR, only can add integer # of reserveTokens to reserve"
+        return self._valuation
+
     # change the expected price
     def changeExpectedPrice(self, newExpectedPrice):
-        self._expectedPrice = newExpectedPrice
+        self._valuation = newExpectedPrice
+        if self._valuation > self._market.getCurrentPrice() and self._reserveBalance > 0:
+            # XXX issue a buy order 
+            self._market.buy(self._reserveBalance)
+            # XXX see how many we ended up actually buying
+            # XXX deduct reserveBalance by the amount paid
+            # XXX increase tokens by the number acquired
+            pass
+        elif self._valuation < self._market.getCurrentPrice() and self._tokenBalance > 0:
+            # XXX issue a sell order
+            # 
+            pass
+        else:
+            # nothing to do
+            pass
 
     '''
     use reserveToken to buy smartToken -> smartToken price increase
@@ -56,7 +68,7 @@ class Customers(object):
     '''
     def buy(self, reserveTokenNumber):
         if reserveTokenNumber < 0:
-            print '** ERROR, cannot buy negative number of smartToken'
+            print '** ERROR, cannot buy negative number of smartToken'sma
             return
         if reserveTokenNumber > self._reserveTokens:
             print '** ERROR, invalid Operation in buy'
@@ -96,7 +108,7 @@ def cust_main():
     '''
     KennyCoin = Smartcoin(name='Kenny',reservetokenName='ETH',initCRR=0.2, initPrice=1,initIssueNum=300000)
     # test for customers class
-    Alice = Customers(smartToken=KennyCoin,ownedSmartTokens=100,reserveTokens=100,expectedPrice= 2)
+    Alice = Customers(smartToken=KennyCoin,ownedSmartTokens=100,reserveTokens=100,valuation = 2)
     Alice.printinfo()
     Alice.buy(90.12)
     Alice.buy(101)
