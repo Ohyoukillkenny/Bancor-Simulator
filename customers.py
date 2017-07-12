@@ -83,21 +83,35 @@ class Customer(object):
             pass
 
 def cust_main():
-    '''
-    Customers with ETH want to buy SmartTokens called KennyCoin
-    '''
+    
     KennyCoin = Smartcoin(name='Kenny',reservetokenName='ETH',initCRR=0.2, initPrice=1.0, initIssueNum=300000)
-    market = BancorMarket(smartToken = KennyCoin)
-    # test for customers class
-    Alice = Customer(smartToken=KennyCoin, market=market, tokenBalance=200, reserveBalance=100)
-    market.sychronize(0)
-    Alice.printInfo()
+    
+    # test for Bancor Market
+    # market1 = BancorMarket(smartToken = KennyCoin)
+    # Alice = Customer(smartToken=KennyCoin, market=market1, tokenBalance=200, reserveBalance=100)
+    # market1.sychronize(0)
+    # Alice.printInfo()
+    # Alice.changeValuation(1.5)
+    # Alice.printInfo()
+    # KennyCoin.printInfo()
+    # Alice.changeValuation(0.9)
+    # Alice.printInfo()
+    # KennyCoin.printInfo()
+    # print market1.getCanceledTransactionNum() , 'being canceled.'
+
+    # test for Classical Market
+    market2 = ClassicalMarket(smartToken = KennyCoin)
+    Alice = Customer(smartToken=KennyCoin, market=market2, tokenBalance=200, reserveBalance=100)
+    Bob = Customer(smartToken=KennyCoin, market=market2, tokenBalance=305, reserveBalance=333)
     Alice.changeValuation(1.5)
     Alice.printInfo()
-    KennyCoin.printInfo()
-    Alice.changeValuation(0.9)
+    Bob.changeValuation(1.6)
+    Bob.changeValuation(0.7)
     Alice.printInfo()
-    KennyCoin.printInfo()
+    Bob.printInfo()
+    Alice.changeValuation(1.4)
+    print market2.getCanceledTransactionNum(), 'being canceled.'
+    print market2.getTotallyFailedTransactionNum(), 'Totally failed.'
 
 if __name__ == '__main__':
     cust_main()

@@ -4,7 +4,7 @@ from customers import *
 class BancorMarket(object):
     def __init__(self, smartToken):
         self._smartToken = smartToken
-        # Order format: (cust, transactionValue, buy_or_sell)
+        # Order format: [cust, transactionValue, buy_or_sell]
         self._OrderList = []
         self._CurrentPrice = smartToken.getInitPrice()
         self._timeList = []
@@ -37,7 +37,7 @@ class BancorMarket(object):
             return self._CurrentPrice
 
     def cancelOrder(self, cust):
-        # Order format: (cust, transactionValue, buy_or_sell)
+        # Order format: [cust, transactionValue, buy_or_sell]
         for s in range(len(self._OrderList)):
             if self._OrderList[s][0] is cust:
                 self._canceledTransactionNum = self._canceledTransactionNum + 1
@@ -84,7 +84,7 @@ class BancorMarket(object):
             self.updateOrderList()
         else:
             # add buy order into orderlist
-            self._OrderList.append((cust, Transaction_Value, self._BUY))
+            self._OrderList.append([cust, Transaction_Value, self._BUY])
             
         
     '''
@@ -108,7 +108,7 @@ class BancorMarket(object):
             self.updateOrderList()
         else:
             # add sell order into orderlist
-            self._OrderList.append((cust, Transaction_Value, self._SELL))
+            self._OrderList.append([cust, Transaction_Value, self._SELL])
 
     # functions for plotting
     def getTransactionNum(self):
@@ -130,10 +130,8 @@ In Classical Market, the price of smart token will not change.
 class ClassicalMarket(object):
     def __init__(self, smartToken):
         self._smartToken = smartToken
-        # Order format: (cust, transactionValue, buy_or_sell)
+        # Order format: [cust, transactionValue, buy_or_sell]
         self._OrderList = []
-        self._timeList = []
-        self._time = 0
         self._CurrentPrice = smartToken.getInitPrice()
 
         self._BUY = 1
@@ -146,17 +144,19 @@ class ClassicalMarket(object):
         self._totallyFailedTransationNum = 0
         self._ChangedOrderList = []
 
+    def getCurrentPrice(self):
+        return self._CurrentPrice
+
     def cancelOrder(self, cust):
-        # Order format: (cust, transactionValue, buy_or_sell)
+        # Order format: [cust, transactionValue, buy_or_sell]
         for s in range(len(self._OrderList)):
             if self._OrderList[s][0] is cust:
                 self._canceledTransactionNum = self._canceledTransactionNum + 1
                 if cust not in self._ChangedOrderList:
                     self._totallyFailedTransationNum = self._totallyFailedTransationNum + 1
-                    self._ChangedOrderList.pop(self._ChangedOrderList.index(cust))
                 else:
                     self._ChangedOrderList.pop(self._ChangedOrderList.index(cust))
-                _OrderList.pop(s)
+                self._OrderList.pop(s)
                 break
 
     def updateOrderList(self, newOrder):
@@ -223,14 +223,14 @@ class ClassicalMarket(object):
     call smartTokens.purchasing() function
     '''
     def buy(self, cust, Transaction_Value):
-        self.updateOrderList((cust, Transaction_Value, self._BUY))
+        self.updateOrderList([cust, Transaction_Value, self._BUY])
         
     '''
     sell #Transaction_Value smartTokens to get reserveTokens -> smartToken price decrease
     call smartTokens.destroying() function
     '''
     def sell(self, cust, Transaction_Value):
-        self.updateOrderList((cust, Transaction_Value, self._SELL))
+        self.updateOrderList([cust, Transaction_Value, self._SELL])
 
     # functions for plotting
     def getTransactionNum(self):
