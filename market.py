@@ -43,7 +43,7 @@ class BancorMarket(object):
         for s in range(len(self._OrderList)):
             if self._OrderList[s][0] is cust:
                 self._canceledTransactionNum = self._canceledTransactionNum + 1
-                _OrderList.pop(s)
+                self._OrderList.pop(s)
                 break
 
     def updateOrderList(self):
@@ -51,7 +51,7 @@ class BancorMarket(object):
         while s < len(self._OrderList):
             if ((self._OrderList[s][2] == self._BUY) and (self._OrderList[s][0].getValuation()>=self._smartToken.getPrice()) ):
                 receivedSmartTokens = self._smartToken.purchasing(self._OrderList[s][1])
-                self._OrderList[s][0].changeReserveBalance(-_OrderList[s][1])
+                self._OrderList[s][0].changeReserveBalance(-self._OrderList[s][1])
                 self._OrderList[s][0].changeTokenBalance(receivedSmartTokens)
                 self._OrderList.pop(s)
                 s = s - 1
@@ -74,7 +74,7 @@ class BancorMarket(object):
         if Transaction_Value < 0:
             print '** ERROR, cannot buy with negative number of reserveToken'
         if not isinstance(Transaction_Value,int):
-            print '** ERROR, should use integer number of reserveTokens to buy'
+            print '** ERROR, should use integer number of reserveTokens to buy', Transaction_Value
         if cust.getValuation() >= self._smartToken.getPrice():
             receivedSmartTokens = self._smartToken.purchasing(Transaction_Value)
             cust.changeReserveBalance(-Transaction_Value)
@@ -98,7 +98,7 @@ class BancorMarket(object):
         if Transaction_Value < 0:
             print '** ERROR, cannot sell negative number of smartToken'
         if not isinstance(Transaction_Value,int):
-            print '** ERROR, should use integer number of smartTokens to sell'
+            print '** ERROR, should use integer number of smartTokens to sell', Transaction_Value
         if cust.getValuation() <= self._smartToken.getPrice():
             receivedReserveTokens = self._smartToken.destroying(Transaction_Value)
             cust.changeReserveBalance(receivedReserveTokens)
@@ -143,7 +143,7 @@ class ClassicalMarket(object):
         # parameters for plotting:
         self._transactionNum = 0
         self._canceledTransactionNum = 0
-        self._totallyFailedTransationNum = 0
+        self._totallyFailedTransactionNum = 0
         self._ChangedOrderList = []
 
 
@@ -151,10 +151,9 @@ class ClassicalMarket(object):
     Reset plotting parameters.
     '''
     def sychronize(self, timeSlot = 0):
-        self._time = timeSlot
         self._transactionNum = 0
         self._canceledTransactionNum = 0
-        self._totallyFailedTransationNum = 0
+        self._totallyFailedTransactionNum = 0
 
     def getCurrentPrice(self):
         return self._CurrentPrice
@@ -165,8 +164,9 @@ class ClassicalMarket(object):
             if self._OrderList[s][0] is cust:
                 self._canceledTransactionNum = self._canceledTransactionNum + 1
                 if cust not in self._ChangedOrderList:
-                    self._totallyFailedTransationNum = self._totallyFailedTransationNum + 1
+                    self._totallyFailedTransactionNum = self._totallyFailedTransactionNum + 1
                 else:
+                    # Since the order will be canceled, the customer should be removed from ChangedOrderList.
                     self._ChangedOrderList.pop(self._ChangedOrderList.index(cust))
                 self._OrderList.pop(s)
                 break
@@ -176,6 +176,11 @@ class ClassicalMarket(object):
         custValuation = cust.getValuation()
         transactionValue =  newOrder[1]
         buy_or_sell = newOrder[2]
+
+        # If the orderlist is empty, just add the new order into list
+        if len(self._OrderList) == 0:
+            self._OrderList.append(newOrder)
+            return 
 
         s = 0
         while s < len(self._OrderList):
@@ -190,6 +195,10 @@ class ClassicalMarket(object):
                         self._OrderList[s][0].changeTokenBalance(-int(transactionValue/self._CurrentPrice))
                         # update the order's info in the orderlist
                         self._OrderList[s][1] = self._OrderList[s][1] - int(transactionValue/self._CurrentPrice)
+                        '''
+                        The seller's order is partially satisfied, we should put him into changeOrderlist 
+                        to illustrate that his transaction is not totally failed.
+                        '''
                         self._ChangedOrderList.append(self._OrderList[s][0])
                         break
                     else:
@@ -236,6 +245,7 @@ class ClassicalMarket(object):
     '''
     def buy(self, cust, Transaction_Value):
         self.updateOrderList([cust, Transaction_Value, self._BUY])
+        self._transactionNum = self._transactionNum + 1
         
     '''
     sell #Transaction_Value smartTokens to get reserveTokens -> smartToken price decrease
@@ -243,6 +253,7 @@ class ClassicalMarket(object):
     '''
     def sell(self, cust, Transaction_Value):
         self.updateOrderList([cust, Transaction_Value, self._SELL])
+        self._transactionNum = self._transactionNum + 1
 
     # functions for plotting
     def getTransactionNum(self):
@@ -252,4 +263,4 @@ class ClassicalMarket(object):
         return self._canceledTransactionNum
 
     def getTotallyFailedTransactionNum(self):
-        return self._totallyFailedTransationNum
+        return self._totallyFailedTransactionNum
