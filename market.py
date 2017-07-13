@@ -14,7 +14,7 @@ class BancorMarket(object):
         self._SELL = -1
         self._ERROR = -2
 
-        # parameters for plotting:
+        # parameters for plotting: txNum and canceledTxNum are reset to 0 in the beginning of every time slot:
         self._transactionNum = 0
         self._canceledTransactionNum = 0
 
@@ -24,6 +24,8 @@ class BancorMarket(object):
     '''
     def sychronize(self, timeSlot):
         self._time = timeSlot
+        self._transactionNum = 0
+        self._canceledTransactionNum = 0
 
     # what getCurrentPrice() returns in Bancor market should be different with the real time price of Smart Token. 
     # This is because since every time slot many customers come into the market simultaneously, 
@@ -143,6 +145,16 @@ class ClassicalMarket(object):
         self._canceledTransactionNum = 0
         self._totallyFailedTransationNum = 0
         self._ChangedOrderList = []
+
+
+    '''
+    Reset plotting parameters.
+    '''
+    def sychronize(self, timeSlot = 0):
+        self._time = timeSlot
+        self._transactionNum = 0
+        self._canceledTransactionNum = 0
+        self._totallyFailedTransationNum = 0
 
     def getCurrentPrice(self):
         return self._CurrentPrice
