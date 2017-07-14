@@ -149,6 +149,11 @@ for mySeed in mySeeds:
     plt.savefig('Figures/Classical/FailedTx-Seed-'+str(mySeed)+'.png', bbox_inches='tight')
     plt.close()
 
+    fw_trax = open('Result/Classical/Tx_T-'+str(TimeSlotNum)+'BI-'+str(bouncingInterval)+
+        'BG-'+str(bouncingRange)+'CN-'+str(custNum)+'Sig-'+str(sigma)+'Seed-'+str(mySeed)+'.txt', 'w')
+    fw_trax.write('All_Tx:'+'\t'+str(sum(txTracker))+'\tCanceled:'+'\t'+str(sum(canceledTxTracker))
+        +'\tTotally_failed:'+'\t'+str(sum(failedTxTracker)))
+    fw_trax.close()
 
 
 

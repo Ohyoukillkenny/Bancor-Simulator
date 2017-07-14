@@ -23,7 +23,7 @@ TimeSlotNum = 1000
 bouncingInterval = 200
 bouncingRange = 10.0
 custNum = 500
-sigma = 0.1
+sigma = 1
 
 # the seeds of pseudo-random numbers
 mySeeds = [0,1,2,3,4]
@@ -147,8 +147,10 @@ for mySeed in mySeeds:
     plt.savefig('Figures/Bancor/CanceledTx-Seed-'+str(mySeed)+'.png', bbox_inches='tight')
     plt.close()
 
-
-
+    fw_trax = open('Result/Bancor/Tx_T-'+str(TimeSlotNum)+'BI-'+str(bouncingInterval)+
+        'BG-'+str(bouncingRange)+'CN-'+str(custNum)+'Sig-'+str(sigma)+'Seed-'+str(mySeed)+'.txt', 'w')
+    fw_trax.write('All_Tx:'+'\t'+str(sum(txTracker))+'\tCanceled:'+'\t'+str(sum(canceledTxTracker)))
+    fw_trax.close()
 
 
 

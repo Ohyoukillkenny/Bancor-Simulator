@@ -123,11 +123,11 @@ class BancorMarket(object):
 
 '''
 Custmers give their orders to Classical Market. Market will process these orders.
-Every Time customers' orders come into market, market will update the order list.
+Once customers' orders come into market, market will update the order list.
 And if customers want to change their valuation, their old orders will be canceled, 
   which means the order is failed (or partially failed -- 
-  A generate a sell order of 100 tokens, he successfully sells 50, but still 50 remaining in orderlist)
-In Classical Market, the price of smart token will not change.
+  e.g. Customer XXX generates a sell order of 100 tokens, he successfully sells 50, but still 50 remaining in orderlist)
+In Classical Market, the price of smart token will not change, but the customers' valuations will change.
 '''
 class ClassicalMarket(object):
     def __init__(self, smartToken):
@@ -180,64 +180,125 @@ class ClassicalMarket(object):
         # If the orderlist is empty, just add the new order into list
         if len(self._OrderList) == 0:
             self._OrderList.append(newOrder)
-            return 
-
-        s = 0
-        while s < len(self._OrderList):
-            if buy_or_sell == self._BUY:
+            return
+        '''
+        Buyer comes into the market, scan the market seller, find sellers who offers the valuation smaller than his valuation:
+            If none of the sellers offers smaller valuation, push new order into list, return
+            If there do exist some sellers, save [seller's valuation, seller] into a list, and sorted by seller's valuation from small to large, then begin the transaction one by one:
+                if the buyer finished his order:
+                    update the buyer's info as well as sellers' info who get involved, 
+                    update the order list, 
+                    possibly pop some sellers from orderlist
+                if the buyer have not finished his order:
+                    update the buyer's info as well as sellers' info who get involved,
+                    pop all sellers who offers lower valuation from orderlist, 
+                    push buyer and his remaining order into orderlist.
+        Same thing goes with seller.
+        '''
+        sellerList = []
+        buyerList = []
+        if buy_or_sell == self._BUY:
+            for s in range(len(self._OrderList)):
                 if self._OrderList[s][2] == self._SELL and custValuation >= self._OrderList[s][0].getValuation():
-                    # sellerMaxTrxValue: the max reservetokens' number the seller could offer with his order
-                    sellerMaxTrxValue = int(self._OrderList[s][1] * self._CurrentPrice)
-                    if transactionValue < sellerMaxTrxValue:
-                        cust.changeReserveBalance(-transactionValue)
-                        cust.changeTokenBalance(int(transactionValue/self._CurrentPrice))
-                        self._OrderList[s][0].changeReserveBalance(transactionValue)
-                        self._OrderList[s][0].changeTokenBalance(-int(transactionValue/self._CurrentPrice))
-                        # update the order's info in the orderlist
-                        self._OrderList[s][1] = self._OrderList[s][1] - int(transactionValue/self._CurrentPrice)
-                        '''
-                        The seller's order is partially satisfied, we should put him into changeOrderlist 
-                        to illustrate that his transaction is not totally failed.
-                        '''
-                        self._ChangedOrderList.append(self._OrderList[s][0])
-                        break
-                    else:
-                        # buy all seller's smarttokens and then try to buy another sellers' smarttokens
-                        cust.changeReserveBalance(-sellerMaxTrxValue)
-                        cust.changeTokenBalance(self._OrderList[s][1])
-                        transactionValue = transactionValue - sellerMaxTrxValue
-                        self._OrderList[s][0].changeReserveBalance(sellerMaxTrxValue)
-                        self._OrderList[s][0].changeTokenBalance(-self._OrderList[s][1])
-                        # clear seller's sell order in the list
-                        self._OrderList.pop(s)
-                        s = s - 1
+                    sellerValuation = self._OrderList[s][0].getValuation()
+                    seller = self._OrderList[s][0]
+                    # sellerList format: [valuation, seller, index of seller in orderList]
+                    sellerList.append([sellerValuation,seller,s])
+
+            if len(sellerList) == 0:
+                self._OrderList.append(newOrder)
+                return
             else:
-                # buy_or_sell == self._SELL
+                sorted(sellerList, key=lambda sellerOrders: sellerOrders[0]) # sorted from small to large
+
+            for t in range(len(sellerList)):
+                sellerValuation = sellerList[t][0]
+                seller = sellerList[t][1]
+                indexInOrderList = sellerList[t][2]
+                sellerMaxCouldSatisfy = int(self._OrderList[indexInOrderList][1] * sellerValuation)
+                if transactionValue < sellerMaxCouldSatisfy:
+                    cust.changeReserveBalance(-transactionValue)
+                    cust.changeTokenBalance(int(transactionValue/sellerValuation))
+                    seller.changeReserveBalance(transactionValue)
+                    seller.changeTokenBalance(-int(transactionValue/sellerValuation))
+                    self._OrderList[indexInOrderList][1] -= int(transactionValue/sellerValuation)
+                    if seller not in self._ChangedOrderList:
+                        # to count whether cust's order is totally failed
+                        self._ChangedOrderList.append(seller)
+                    break # cust's order is satisfied
+                else: 
+                # seller cannot satisfy buyer's need, transactionValue >= sellerMaxCouldSatisfy
+                    cust.changeReserveBalance(-sellerMaxCouldSatisfy)
+                    cust.changeTokenBalance(self._OrderList[indexInOrderList][1])
+                    transactionValue -= sellerMaxCouldSatisfy
+                    seller.changeReserveBalance(sellerMaxCouldSatisfy)
+                    seller.changeTokenBalance(-self._OrderList[indexInOrderList][1])
+                    self._OrderList.pop(indexInOrderList)
+                    for item in sellerList:
+                        if item[2] > indexInOrderList:
+                            # update index info, since one seller is poped out from orderList
+                            item[2] -= 1
+
+            if transactionValue < 0:
+                print '** Error, buyer buys too much in market class'
+            elif transactionValue == 0:
+                return
+            else:
+                # transactionValue > 0
+                newOrder[1] = transactionValue
+                self._OrderList.append(newOrder)
+        else:
+            # buy_or_sell == self._SELL
+            for s in range(len(self._OrderList)):
                 if self._OrderList[s][2] == self._BUY and custValuation <= self._OrderList[s][0].getValuation():
-                    # buyerMaxTrxValue: the max smarttokens' number the buyer can buy with the his order
-                    buyerMaxTrxValue = int(self._OrderList[s][1] / self._CurrentPrice)
-                    if transactionValue < buyerMaxTrxValue:
-                        cust.changeReserveBalance(int(transactionValue * self._CurrentPrice))
-                        cust.changeTokenBalance(-transactionValue)
-                        self._OrderList[s][0].changeReserveBalance(-int(transactionValue * self._CurrentPrice))
-                        self._OrderList[s][0].changeTokenBalance(transactionValue)
-                        # update the order's info in the orderlist
-                        self._OrderList[s][1] = self._OrderList[s][1] - int(transactionValue * self._CurrentPrice)
-                        self._ChangedOrderList.append(self._OrderList[s][0])
-                        break
-                    else:
-                        cust.changeReserveBalance(self._OrderList[s][1])
-                        cust.changeTokenBalance(-buyerMaxTrxValue)
-                        transactionValue = transactionValue - buyerMaxTrxValue
-                        self._OrderList[s][0].changeReserveBalance(-self._OrderList[s][1])
-                        self._OrderList[s][0].changeTokenBalance(buyerMaxTrxValue)
-                        # clear buyer's buy order in the list
-                        self._OrderList.pop(s)
-                        s = s - 1
-            s = s + 1
-        if transactionValue > 0:
-            newOrder[1] = transactionValue
-            self._OrderList.append(newOrder)
+                    buyerValuation = self._OrderList[s][0].getValuation()
+                    buyer = self._OrderList[s][0]
+                    # buyerList format: [valuation, buyer, index of buyer in orderList]
+                    buyerList.append([buyerValuation,buyer,s])
+
+            if len(buyerList) == 0:
+                self._OrderList.append(newOrder)
+                return
+            else:
+                # sorted from large to small
+                sorted(sellerList, key=lambda sellerOrders: sellerOrders[0], reverse=True) 
+
+            for t in range(len(buyerList)):
+                buyerValuation = buyerList[t][0]
+                buyer = buyerList[t][1]
+                indexInOrderList = buyerList[t][2]
+                buyerMaxCouldBuy = int(self._OrderList[indexInOrderList][1] / buyerValuation)
+                if transactionValue < buyerMaxCouldBuy:
+                    cust.changeReserveBalance(int(transactionValue * buyerValuation))
+                    cust.changeTokenBalance(-transactionValue)
+                    buyer.changeReserveBalance(-int(transactionValue * buyerValuation))
+                    buyer.changeTokenBalance(transactionValue)
+                    self._OrderList[indexInOrderList][1] -= int(transactionValue * buyerValuation)
+                    if buyer not in self._ChangedOrderList:
+                        # to count whether cust's order is totally failed
+                        self._ChangedOrderList.append(buyer)
+                    break # cust's order is satisfied
+                else:
+                    # buyer cannot satisfy the seller's need, transactionValue >= buyerMaxCouldBuy
+                    cust.changeReserveBalance(self._OrderList[indexInOrderList][1])
+                    cust.changeTokenBalance(-buyerMaxCouldBuy)
+                    transactionValue -= buyerMaxCouldBuy
+                    buyer.changeReserveBalance(-self._OrderList[indexInOrderList][1])
+                    buyer.changeTokenBalance(buyerMaxCouldBuy)
+                    self._OrderList.pop(indexInOrderList)
+                    for item in buyerList:
+                        if item[2] > indexInOrderList:
+                            # update index info, since one buyer is poped out from orderList
+                            item[2] -= 1 
+
+            if transactionValue < 0:
+                print '** Error, Seller sells too much in market class'
+            elif transactionValue == 0:
+                return
+            else:
+                # transactionValue > 0
+                newOrder[1] = transactionValue
+                self._OrderList.append(newOrder)
 
     '''
     use #Transaction_Value reserveTokens to buy smartTokens -> smartToken price increase
