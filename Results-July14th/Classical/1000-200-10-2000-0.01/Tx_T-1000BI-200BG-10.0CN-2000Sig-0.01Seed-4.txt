@@ -1,0 +1,1 @@
+All_Tx:	613502	Canceled:	37	Totally_failed:	2

@@ -45,7 +45,13 @@ class BancorMarket(object):
                 self._canceledTransactionNum = self._canceledTransactionNum + 1
                 self._OrderList.pop(s)
                 break
-
+    '''
+    Becuase in Bancor Market, after every transaction, the price of smart token will be changed.
+    Update the orderlist by recursion after every time transaction being made is too time-comsuming.
+    Here, we just scan the orderlist once if the price being changed. 
+        E.g., every time the price of token changes, we will sequence through the orderlist to see whether some orders can be satisfied.
+    And this method offers almost same accuracy with recursion function.
+    '''
     def updateOrderList(self):
         s = 0
         while s < len(self._OrderList):
@@ -184,16 +190,27 @@ class ClassicalMarket(object):
         '''
         Buyer comes into the market, scan the market seller, find sellers who offers the valuation smaller than his valuation:
             If none of the sellers offers smaller valuation, push new order into list, return
-            If there do exist some sellers, save [seller's valuation, seller] into a list, and sorted by seller's valuation from small to large, then begin the transaction one by one:
-                if the buyer finished his order:
-                    update the buyer's info as well as sellers' info who get involved, 
-                    update the order list, 
-                    possibly pop some sellers from orderlist
-                if the buyer have not finished his order:
-                    update the buyer's info as well as sellers' info who get involved,
-                    pop all sellers who offers lower valuation from orderlist, 
-                    push buyer and his remaining order into orderlist.
-        Same thing goes with seller.
+            If there do exist some sellers, save [seller's valuation, seller, seller's index in orderList] into a seller list, 
+            and sorted by sellers' valuations from small to large. 
+            Then, buyer will try to make transaction with the seller in list one by one:
+            Loop:
+                if the buyer's demand can be satisfied by seller:
+                    update the buyer's info in customer class,
+                    update the seller's info in customer class, 
+                    update the seller's info in order list. 
+                    return
+                if the buyer's demand can not be fully satisfied by seller:
+                    update the buyer's info in customer class,
+                    decrease buyer's demand
+                    update the seller's info in customer class,
+                    pop the seller out of order list
+                    update other sellers in seller list's index info since one seller is poped out of orderlist 
+            if buyer's demand still > 0:
+                push buyer's remaining demand into order list
+            else:
+                just return, since the buyer's demand is satisfied by transaction
+
+        Same thing goes with seller. But for seller, the buyer list should be sorted from high valuation to low valuation
         '''
         sellerList = []
         buyerList = []
@@ -209,7 +226,7 @@ class ClassicalMarket(object):
                 self._OrderList.append(newOrder)
                 return
             else:
-                sorted(sellerList, key=lambda sellerOrders: sellerOrders[0]) # sorted from small to large
+                sorted(sellerList, key=lambda sellerOrders: sellerOrders[0]) # sorted from low to high
 
             for t in range(len(sellerList)):
                 sellerValuation = sellerList[t][0]
@@ -260,7 +277,7 @@ class ClassicalMarket(object):
                 self._OrderList.append(newOrder)
                 return
             else:
-                # sorted from large to small
+                # sorted from high to low
                 sorted(sellerList, key=lambda sellerOrders: sellerOrders[0], reverse=True) 
 
             for t in range(len(buyerList)):

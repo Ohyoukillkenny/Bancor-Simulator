@@ -22,7 +22,7 @@ MyClassicalMarket = ClassicalMarket(smartToken = KennyCoin)
 TimeSlotNum = 1000
 bouncingInterval = 50
 bouncingRange = 10.0
-custNum = 500
+custNum = 2000
 sigma = 0.1
 
 # the seeds of pseudo-random numbers
