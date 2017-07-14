@@ -12,7 +12,7 @@ Python 2.7 + Anaconda 2.7
 ### Here we give three ways to view how Bancor protocol works.
 
 1. *Recommended*, run **Bancor-Simulator.ipynb** in ipython notebook, then follow the comments.
-2. Run **main.py** in python. The customers.py presents the python class for customer simulating, the smartToken.py is the python class for smartToken in Bancor market, which includes the Bancor protocol.
+2. Run **main-Bancor.py** and **main-Classical.py** in python. The **customers.py** presents the python class for customer simulating. The **smartToken.py** is the python class for smartToken in Bancor market, which includes the Bancor protocol. And the **market.py** is the python class for Bancor Market and Classical Market simulating.
 
 ## Other documents
 
