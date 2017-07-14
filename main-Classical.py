@@ -20,7 +20,7 @@ KennyCoin = Smartcoin(name='Kenny',reservetokenName='ETH',initCRR=0.2, initPrice
 MyClassicalMarket = ClassicalMarket(smartToken = KennyCoin)
 
 TimeSlotNum = 1000
-bouncingInterval = 200
+bouncingInterval = 50
 bouncingRange = 10.0
 custNum = 500
 sigma = 0.1
@@ -65,6 +65,7 @@ for mySeed in mySeeds:
     failedTxTracker = []
 
     for j in range(TimeSlotNum):
+
         # Sychronize the market
         sychronizeMarket(MyClassicalMarket, j)
 
@@ -83,8 +84,11 @@ for mySeed in mySeeds:
         custValuation_list = np.random.normal(valuation_mu, sigma, custNum)
         for i in range(custNum):
             if custValuation_list[i] < 0:
-                custList[i].changeValuation(0)
-            custList[i].changeValuation(custValuation_list[i])
+                # Customer does not want to sell their token in free. 
+                # Here we give them a small valuation when valuation < 0
+                custList[i].changeValuation(0.001*currentMarketPrice)
+            else:
+                custList[i].changeValuation(custValuation_list[i])
 
         txTracker.append(MyClassicalMarket.getTransactionNum())
         canceledTxTracker.append(MyClassicalMarket.getCanceledTransactionNum())
@@ -154,11 +158,4 @@ for mySeed in mySeeds:
     fw_trax.write('All_Tx:'+'\t'+str(sum(txTracker))+'\tCanceled:'+'\t'+str(sum(canceledTxTracker))
         +'\tTotally_failed:'+'\t'+str(sum(failedTxTracker)))
     fw_trax.close()
-
-
-
-
-
-
-
 

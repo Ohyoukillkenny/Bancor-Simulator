@@ -103,6 +103,7 @@ def cust_main():
     market2 = ClassicalMarket(smartToken = KennyCoin)
     Alice = Customer(smartToken=KennyCoin, market=market2, tokenBalance=200, reserveBalance=100)
     Bob = Customer(smartToken=KennyCoin, market=market2, tokenBalance=305, reserveBalance=333)
+    market2.sychronize(0)
     Alice.changeValuation(1.5)
     Alice.printInfo()
     Bob.changeValuation(1.6)
