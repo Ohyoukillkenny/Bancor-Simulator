@@ -99,8 +99,8 @@ def cust_main():
     # KennyCoin.printInfo()
     # print market1.getCanceledTransactionNum() , 'being canceled.'
 
-    # test for Classical Market
-    market2 = ClassicalMarket(smartToken = KennyCoin)
+    # test for Classic Market
+    market2 = ClassicMarket(smartToken = KennyCoin)
     Alice = Customer(smartToken=KennyCoin, market=market2, tokenBalance=200, reserveBalance=100)
     Bob = Customer(smartToken=KennyCoin, market=market2, tokenBalance=305, reserveBalance=333)
     market2.sychronize(0)

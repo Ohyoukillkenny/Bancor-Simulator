@@ -128,14 +128,14 @@ class BancorMarket(object):
 
 
 '''
-Custmers give their orders to Classical Market. Market will process these orders.
+Custmers give their orders to Classic Market. Market will process these orders.
 Once customers' orders come into market, market will update the order list.
 And if customers want to change their valuation, their old orders will be canceled, 
   which means the order is failed (or partially failed -- 
   e.g. Customer XXX generates a sell order of 100 tokens, he successfully sells 50, but still 50 remaining in orderlist)
-In Classical Market, the price of smart token will not change, but the customers' valuations will change.
+In Classic Market, the price of smart token will not change, but the customers' valuations will change.
 '''
-class ClassicalMarket(object):
+class ClassicMarket(object):
     def __init__(self, smartToken):
         self._smartToken = smartToken
         # Order format: [cust, transactionValue, buy_or_sell]
