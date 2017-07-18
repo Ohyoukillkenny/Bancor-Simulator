@@ -65,7 +65,6 @@ for mySeed in mySeeds:
     failedTxTracker = []
 
     for j in range(TimeSlotNum):
-
         # Sychronize the market
         sychronizeMarket(MyClassicMarket, j)
 
@@ -111,7 +110,7 @@ for mySeed in mySeeds:
     for j in range(TimeSlotNum):
         txPlot.append(txTracker[j])
         myX_T.append(j)
-        j = j + 1
+
     x_T = np.asarray(myX_T)
     y_T = np.asarray(txPlot)
     plt.plot(x_T, y_T, 'o-',color = 'navy', alpha = 0.8)
@@ -127,7 +126,7 @@ for mySeed in mySeeds:
     for j in range(TimeSlotNum):
         canceledTxPlot.append(canceledTxTracker[j])
         myX_C.append(j)
-        j = j + 1
+
     x_C = np.asarray(myX_C)
     y_C = np.asarray(canceledTxPlot)
     plt.plot(x_C, y_C, 'o-',color = 'navy', alpha = 0.8)
@@ -143,7 +142,7 @@ for mySeed in mySeeds:
     for j in range(TimeSlotNum):
         failedTxPlot.append(failedTxTracker[j])
         myX_F.append(j)
-        j = j + 1
+
     x_F = np.asarray(myX_F)
     y_F = np.asarray(failedTxPlot)
     plt.plot(x_F, y_F, 'o-',color = 'navy', alpha = 0.8)

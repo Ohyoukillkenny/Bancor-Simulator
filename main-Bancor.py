@@ -20,9 +20,9 @@ KennyCoin = Smartcoin(name='Kenny',reservetokenName='ETH',initCRR=0.2, initPrice
 MyBancorMarket = BancorMarket(smartToken = KennyCoin)
 
 TimeSlotNum = 1000
-bouncingInterval = 50
+bouncingInterval = 200
 bouncingRange = 10.0
-custNum = 2000
+custNum = 500
 sigma = 0.1
 
 # the seeds of pseudo-random numbers
@@ -108,7 +108,6 @@ for mySeed in mySeeds:
     for j in range(TimeSlotNum):
         pricePlot.append(priceTracker[j])
         myX_P.append(j)
-        j = j + 1
     x_P = np.asarray(myX_P)
     y_P = np.asarray(pricePlot)
     plt.plot(x_P, y_P, 'o-',color = 'navy', alpha = 0.8)
@@ -124,7 +123,7 @@ for mySeed in mySeeds:
     for j in range(TimeSlotNum):
         txPlot.append(txTracker[j])
         myX_T.append(j)
-        j = j + 1
+
     x_T = np.asarray(myX_T)
     y_T = np.asarray(txPlot)
     plt.plot(x_T, y_T, 'o-',color = 'navy', alpha = 0.8)
@@ -140,7 +139,7 @@ for mySeed in mySeeds:
     for j in range(TimeSlotNum):
         canceledTxPlot.append(canceledTxTracker[j])
         myX_C.append(j)
-        j = j + 1
+
     x_C = np.asarray(myX_C)
     y_C = np.asarray(canceledTxPlot)
     plt.plot(x_C, y_C, 'o-',color = 'navy', alpha = 0.8)
@@ -150,11 +149,30 @@ for mySeed in mySeeds:
     plt.savefig('Figures/Bancor/CanceledTx-Seed-'+str(mySeed)+'.png', bbox_inches='tight')
     plt.close()
 
+    # File about transactions counting
     fw_trax = open('Result/Bancor/Tx_T-'+str(TimeSlotNum)+'BI-'+str(bouncingInterval)+
         'BG-'+str(bouncingRange)+'CN-'+str(custNum)+'Sig-'+str(sigma)+'Seed-'+str(mySeed)+'.txt', 'w')
     fw_trax.write('All_Tx:'+'\t'+str(sum(txTracker))+'\tCanceled:'+'\t'+str(sum(canceledTxTracker)))
     fw_trax.close()
 
+    # File about price slipping
+    priceSlip = 0
+    mediumPriceSlip = 0
+    hugePriceSlip = 0
+    for j in range(TimeSlotNum - 1):
+        if priceTracker[j+1] < priceTracker[j]:
+            priceSlip += 1
+            if priceTracker[j+1] < 0.95 * priceTracker[j]:
+                mediumPriceSlip += 1
+                if priceTracker[j+1] < 0.95 * priceTracker[j]:
+                    hugePriceSlip += 1
+        else:
+            continue
+    fw_slip = open('Result/Bancor/Slip_T-'+str(TimeSlotNum)+'BI-'+str(bouncingInterval)+
+        'BG-'+str(bouncingRange)+'CN-'+str(custNum)+'Sig-'+str(sigma)+'Seed-'+str(mySeed)+'.txt', 'w')
+    fw_slip.write('Slip:'+'\t'+str(priceSlip)+'\tMedium-slip:'+'\t'
+        +str(mediumPriceSlip)+'\tHuge-slip:'+'\t'+str(hugePriceSlip))
+    fw_slip.close()
 
 
 
