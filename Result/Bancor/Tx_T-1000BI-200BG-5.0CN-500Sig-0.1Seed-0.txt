@@ -1,1 +1,1 @@
-All_Tx:	250439	Canceled:	1176
+All_Tx:	250520	Canceled:	1185

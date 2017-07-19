@@ -1,0 +1,1 @@
+All_Tx:	45013	Canceled:	1380	Totally_failed:	719
