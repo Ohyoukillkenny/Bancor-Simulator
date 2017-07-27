@@ -178,6 +178,7 @@ class ClassicMarket(object):
                 break
 
     def updateOrderList(self, newOrder):
+        # newOrder: [cust, transactionValue, buy_or_sell]
         cust = newOrder[0]
         custValuation = cust.getValuation()
         transactionValue =  newOrder[1]
@@ -226,7 +227,7 @@ class ClassicMarket(object):
                 self._OrderList.append(newOrder)
                 return
             else:
-                sorted(sellerList, key=lambda sellerOrders: sellerOrders[0]) # sorted from low to high
+                sellerList = sorted(sellerList, key=lambda sellerOrders: sellerOrders[0]) # sorted from low to high
 
             for t in range(len(sellerList)):
                 sellerValuation = sellerList[t][0]
@@ -239,6 +240,7 @@ class ClassicMarket(object):
                     seller.changeReserveBalance(transactionValue)
                     seller.changeTokenBalance(-int(transactionValue/sellerValuation))
                     self._OrderList[indexInOrderList][1] -= int(transactionValue/sellerValuation)
+                    transactionValue -= transactionValue
                     if seller not in self._ChangedOrderList:
                         # to count whether cust's order is totally failed
                         self._ChangedOrderList.append(seller)
@@ -278,7 +280,7 @@ class ClassicMarket(object):
                 return
             else:
                 # sorted from high to low
-                sorted(sellerList, key=lambda sellerOrders: sellerOrders[0], reverse=True) 
+                buyerList = sorted(buyerList, key=lambda buyerOrders: buyerOrders[0], reverse=True)
 
             for t in range(len(buyerList)):
                 buyerValuation = buyerList[t][0]
@@ -291,6 +293,7 @@ class ClassicMarket(object):
                     buyer.changeReserveBalance(-int(transactionValue * buyerValuation))
                     buyer.changeTokenBalance(transactionValue)
                     self._OrderList[indexInOrderList][1] -= int(transactionValue * buyerValuation)
+                    transactionValue -= transactionValue
                     if buyer not in self._ChangedOrderList:
                         # to count whether cust's order is totally failed
                         self._ChangedOrderList.append(buyer)
@@ -322,6 +325,12 @@ class ClassicMarket(object):
     call smartTokens.purchasing() function
     '''
     def buy(self, cust, Transaction_Value):
+        if Transaction_Value < 0:
+            print '** ERROR, cannot sell negative number of smartToken'
+            return
+        if not isinstance(Transaction_Value,int):
+            print '** ERROR, should use integer number of smartTokens to sell', Transaction_Value
+            return
         self.updateOrderList([cust, Transaction_Value, self._BUY])
         self._transactionNum = self._transactionNum + 1
         
@@ -330,6 +339,12 @@ class ClassicMarket(object):
     call smartTokens.destroying() function
     '''
     def sell(self, cust, Transaction_Value):
+        if Transaction_Value < 0:
+            print '** ERROR, cannot sell negative number of smartToken'
+            return
+        if not isinstance(Transaction_Value,int):
+            print '** ERROR, should use integer number of smartTokens to sell', Transaction_Value
+            return
         self.updateOrderList([cust, Transaction_Value, self._SELL])
         self._transactionNum = self._transactionNum + 1
 
