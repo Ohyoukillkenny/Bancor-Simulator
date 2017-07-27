@@ -1,1 +1,0 @@
-All_Tx:	249705	Canceled:	173987	Totally_failed:	138037

@@ -1,6 +1,0 @@
-PWD /Users/konglingkun/Desktop/Results/Classical/1000-50-10-2000-0.1
-INPUT /usr/local/texlive/2016/texmf.cnf
-INPUT /usr/local/texlive/2016/texmf-dist/web2c/texmf.cnf
-INPUT /usr/local/texlive/2016/texmf-var/web2c/pdftex/pdflatex.fmt
-INPUT template.tex
-OUTPUT template.log

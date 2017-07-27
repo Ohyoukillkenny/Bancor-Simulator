@@ -126,7 +126,7 @@ for bouncingInterval in [50, 200]:
                     plt.title('Transaction Num For Classic Market',fontsize = 25)
                     plt.xlabel('Time Slot #',fontsize = 15)
                     plt.ylabel('Transaction #', fontsize = 15)
-                    plt.savefig('Figures/Classic/Transactions-Seed-'+str(mySeed)+'.png', bbox_inches='tight')
+                    plt.savefig('Figures/Classic/Transactions-Seed-'+str(mySeed)+'.pdf', bbox_inches='tight')
                     plt.close()
 
                     # Figure about canceled transactions
@@ -142,7 +142,7 @@ for bouncingInterval in [50, 200]:
                     plt.title('Canceled Transaction Num For Classic Market',fontsize = 25)
                     plt.xlabel('Time Slot #',fontsize = 15)
                     plt.ylabel('Canceled Transaction #', fontsize = 15)
-                    plt.savefig('Figures/Classic/CanceledTx-Seed-'+str(mySeed)+'.png', bbox_inches='tight')
+                    plt.savefig('Figures/Classic/CanceledTx-Seed-'+str(mySeed)+'.pdf', bbox_inches='tight')
                     plt.close()
 
                     # Figure about failed transactions
@@ -158,7 +158,7 @@ for bouncingInterval in [50, 200]:
                     plt.title('Failed Transaction Num For Classic Market',fontsize = 25)
                     plt.xlabel('Time Slot #',fontsize = 15)
                     plt.ylabel('Failed Transaction #', fontsize = 15)
-                    plt.savefig('Figures/Classic/FailedTx-Seed-'+str(mySeed)+'.png', bbox_inches='tight')
+                    plt.savefig('Figures/Classic/FailedTx-Seed-'+str(mySeed)+'.pdf', bbox_inches='tight')
                     plt.close()
 
                     fw_trax = open('Result/Classic/Tx_T-'+str(TimeSlotNum)+'BI-'+str(bouncingInterval)+

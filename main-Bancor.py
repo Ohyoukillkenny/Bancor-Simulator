@@ -127,7 +127,7 @@ for bouncingInterval in [50, 200]:
                     plt.title('Price Change For Bancor Market',fontsize = 25)
                     plt.xlabel('Time Slot #',fontsize = 15)
                     plt.ylabel('Price of Smart Token', fontsize = 15)
-                    plt.savefig('Figures/Bancor/Price-Seed-'+str(mySeed)+'.png', bbox_inches='tight')
+                    plt.savefig('Figures/Bancor/Price-Seed-'+str(mySeed)+'.pdf', bbox_inches='tight')
                     plt.close()
 
                     # Figure about transactions
@@ -143,7 +143,7 @@ for bouncingInterval in [50, 200]:
                     plt.title('Transaction Num For Bancor Market',fontsize = 25)
                     plt.xlabel('Time Slot #',fontsize = 15)
                     plt.ylabel('Transaction #', fontsize = 15)
-                    plt.savefig('Figures/Bancor/Transactions-Seed-'+str(mySeed)+'.png', bbox_inches='tight')
+                    plt.savefig('Figures/Bancor/Transactions-Seed-'+str(mySeed)+'.pdf', bbox_inches='tight')
                     plt.close()
 
                     # Figure about canceled transactions
@@ -159,7 +159,7 @@ for bouncingInterval in [50, 200]:
                     plt.title('Canceled Transaction Num For Bancor Market',fontsize = 25)
                     plt.xlabel('Time Slot #',fontsize = 15)
                     plt.ylabel('Canceled Transaction #', fontsize = 15)
-                    plt.savefig('Figures/Bancor/CanceledTx-Seed-'+str(mySeed)+'.png', bbox_inches='tight')
+                    plt.savefig('Figures/Bancor/CanceledTx-Seed-'+str(mySeed)+'.pdf', bbox_inches='tight')
                     plt.close()
 
                     # File about transactions counting
@@ -210,11 +210,4 @@ for bouncingInterval in [50, 200]:
                     +'\t'+str(avg_ALL_SLIP)+'\t'+str(avg_ALL_MEDIUMSLIP)+'\t'+str(avg_ALL_HUGESLIP)+'\t'
                     +str(Slip_Ratio)+'\t'+str(MediumSlip_Ratio)+'\t'+str(HugeSlip_Ratio))
                 fw_statistic.close()
-
-
-
-
-
-
-
 
