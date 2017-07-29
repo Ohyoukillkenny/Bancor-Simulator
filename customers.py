@@ -60,6 +60,7 @@ class Customer(object):
 
     # change the valuation, if customer has a new valuation, he will generate a new transaction request, 
     # and market will give responce for this request
+    # if you want to implement half-in policy, please comment all-in policy and then uncomment half-in policy
     def changeValuation(self, newValuation):
         self._valuation = newValuation
         '''
@@ -74,10 +75,12 @@ class Customer(object):
         '''
         if self._valuation > self._market.getCurrentPrice() and self._reserveBalance > 0:
             # XXX issues a buy order 
-            self._market.buy(self, self._reserveBalance)
+            self._market.buy(self, self._reserveBalance) # all-in policy
+            # self._market.buy(self, int(0.5 * self._reserveBalance)) # half-in policy
         elif self._valuation < self._market.getCurrentPrice() and self._tokenBalance > 0:
             # XXX issue a sell order
-            self._market.sell(self, self._tokenBalance)
+            self._market.sell(self, self._tokenBalance) # all-in policy
+            # self._market.sell(self, int(0.5 * self._tokenBalance)) # half-in policy
         else:
             # nothing to do
             pass
