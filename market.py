@@ -38,39 +38,9 @@ class BancorMarket(object):
             self._CurrentPrice = self._smartToken.getPrice()
             return self._CurrentPrice
 
-    def cancelOrder(self, cust):
-        # Order format: [cust, transactionValue, buy_or_sell]
-        for s in range(len(self._OrderList)):
-            if self._OrderList[s][0] is cust:
-                self._canceledTransactionNum = self._canceledTransactionNum + 1
-                self._OrderList.pop(s)
-                break
-    '''
-    Becuase in Bancor Market, after every transaction, the price of smart token will be changed.
-    Update the orderlist by recursion after every time transaction being made is too time-comsuming.
-    Here, we just scan the orderlist once if the price being changed. 
-        E.g., every time the price of token changes, we will sequence through the orderlist to see whether some orders can be satisfied.
-    And this method offers almost same accuracy with recursion function.
-    '''
-    def updateOrderList(self):
-        s = 0
-        while s < len(self._OrderList):
-            if ((self._OrderList[s][2] == self._BUY) and (self._OrderList[s][0].getValuation()>=self._smartToken.getPrice()) ):
-                receivedSmartTokens = self._smartToken.purchasing(self._OrderList[s][1])
-                self._OrderList[s][0].changeReserveBalance(-self._OrderList[s][1])
-                self._OrderList[s][0].changeTokenBalance(receivedSmartTokens)
-                self._OrderList.pop(s)
-                s = s - 1
-            elif ((self._OrderList[s][2] == self._SELL) and (self._OrderList[s][0].getValuation()<=self._smartToken.getPrice()) ):
-                receivedReserveTokens = self._smartToken.destroying(self._OrderList[s][1])
-                self._OrderList[s][0].changeReserveBalance(receivedReserveTokens)
-                self._OrderList[s][0].changeTokenBalance(-self._OrderList[s][1])
-                self._OrderList.pop(s)
-                s = s - 1
-            else:
-                # nothing to do
-                pass
-            s = s + 1
+    def ifFinishedOrder(self, cust):
+        return True
+
     '''
     use #Transaction_Value reserveTokens to buy smartTokens -> smartToken price increase
     call smartTokens.purchasing() function
@@ -85,14 +55,9 @@ class BancorMarket(object):
             receivedSmartTokens = self._smartToken.purchasing(Transaction_Value)
             cust.changeReserveBalance(-Transaction_Value)
             cust.changeTokenBalance(receivedSmartTokens)
-            '''
-            Since the price of smart token is changed, maybe some transaction requests in orderlist is now acceptable, 
-                we need to update the OrderList Now.
-            '''
-            self.updateOrderList()
         else:
-            # add buy order into orderlist
-            self._OrderList.append([cust, Transaction_Value, self._BUY])
+            # This order will be canceled, no extra operation.
+            self._canceledTransactionNum += 1
             
         
     '''
@@ -109,14 +74,9 @@ class BancorMarket(object):
             receivedReserveTokens = self._smartToken.destroying(Transaction_Value)
             cust.changeReserveBalance(receivedReserveTokens)
             cust.changeTokenBalance(-Transaction_Value)
-            '''
-            Since the price of smart token is changed, maybe some transaction requests in orderlist is now acceptable, 
-                we need to update the OrderList Now.
-            '''
-            self.updateOrderList()
         else:
-            # add sell order into orderlist
-            self._OrderList.append([cust, Transaction_Value, self._SELL])
+            # This order will be canceled, no extra operation.
+            self._canceledTransactionNum += 1
 
     # functions for plotting
     def getTransactionNum(self):
@@ -148,8 +108,8 @@ class ClassicMarket(object):
 
         # parameters for plotting:
         self._transactionNum = 0
-        self._canceledTransactionNum = 0
-        self._totallyFailedTransactionNum = 0
+
+        # Order format: [cust], record the orders being partially satisfied
         self._ChangedOrderList = []
 
 
@@ -158,24 +118,17 @@ class ClassicMarket(object):
     '''
     def sychronize(self, timeSlot = 0):
         self._transactionNum = 0
-        self._canceledTransactionNum = 0
-        self._totallyFailedTransactionNum = 0
 
     def getCurrentPrice(self):
         return self._CurrentPrice
 
-    def cancelOrder(self, cust):
-        # Order format: [cust, transactionValue, buy_or_sell]
-        for s in range(len(self._OrderList)):
-            if self._OrderList[s][0] is cust:
-                self._canceledTransactionNum = self._canceledTransactionNum + 1
-                if cust not in self._ChangedOrderList:
-                    self._totallyFailedTransactionNum = self._totallyFailedTransactionNum + 1
-                else:
-                    # Since the order will be canceled, the customer should be removed from ChangedOrderList.
-                    self._ChangedOrderList.pop(self._ChangedOrderList.index(cust))
-                self._OrderList.pop(s)
-                break
+    def ifFinishedOrder(self, cust):
+        for i in range(len(self._OrderList)):
+            # Order format: [cust, transactionValue, buy_or_sell]
+            if cust is self._OrderList[i][0]:
+                return False
+        '''if the cust's order is not in the orderlist, return True'''        
+        return True
 
     def updateOrderList(self, newOrder):
         # newOrder: [cust, transactionValue, buy_or_sell]
@@ -184,7 +137,7 @@ class ClassicMarket(object):
         transactionValue =  newOrder[1]
         buy_or_sell = newOrder[2]
 
-        # If the orderlist is empty, just add the new order into list
+        # If the orderlist is empty, just add the new order into list.
         if len(self._OrderList) == 0:
             self._OrderList.append(newOrder)
             return
@@ -195,7 +148,7 @@ class ClassicMarket(object):
             and sorted by sellers' valuations from small to large. 
             Then, buyer will try to make transaction with the seller in list one by one:
             Loop:
-                if the buyer's demand can be satisfied by seller:
+                if the buyer's demand can be satisfied by sellers:
                     update the buyer's info in customer class,
                     update the seller's info in customer class, 
                     update the seller's info in order list. 
@@ -240,7 +193,7 @@ class ClassicMarket(object):
                     seller.changeReserveBalance(transactionValue)
                     seller.changeTokenBalance(-int(transactionValue/sellerValuation))
                     self._OrderList[indexInOrderList][1] -= int(transactionValue/sellerValuation)
-                    transactionValue -= transactionValue
+                    transactionValue -= transactionValue # i.e. transactionValue = 0
                     if seller not in self._ChangedOrderList:
                         # to count whether cust's order is totally failed
                         self._ChangedOrderList.append(seller)
@@ -257,13 +210,17 @@ class ClassicMarket(object):
                         if item[2] > indexInOrderList:
                             # update index info, since one seller is poped out from orderList
                             item[2] -= 1
+                    if seller in self._ChangedOrderList:
+                        # remove it as it is completed
+                        self._ChangedOrderList.remove(seller)
 
             if transactionValue < 0:
                 print '** Error, buyer buys too much in market class'
             elif transactionValue == 0:
                 return
             else:
-                # transactionValue > 0
+                if transactionValue < newOrder[1]:
+                    self._ChangedOrderList.append(newOrder[0])
                 newOrder[1] = transactionValue
                 self._OrderList.append(newOrder)
         else:
@@ -293,7 +250,7 @@ class ClassicMarket(object):
                     buyer.changeReserveBalance(-int(transactionValue * buyerValuation))
                     buyer.changeTokenBalance(transactionValue)
                     self._OrderList[indexInOrderList][1] -= int(transactionValue * buyerValuation)
-                    transactionValue -= transactionValue
+                    transactionValue -= transactionValue # i.e. transactionValue = 0
                     if buyer not in self._ChangedOrderList:
                         # to count whether cust's order is totally failed
                         self._ChangedOrderList.append(buyer)
@@ -310,13 +267,16 @@ class ClassicMarket(object):
                         if item[2] > indexInOrderList:
                             # update index info, since one buyer is poped out from orderList
                             item[2] -= 1 
+                    if buyer in self._ChangedOrderList:
+                        self._ChangedOrderList.remove(buyer)
 
             if transactionValue < 0:
                 print '** Error, Seller sells too much in market class'
             elif transactionValue == 0:
                 return
             else:
-                # transactionValue > 0
+                if transactionValue < newOrder[1]:
+                    self._ChangedOrderList.append(newOrder[0])
                 newOrder[1] = transactionValue
                 self._OrderList.append(newOrder)
 
@@ -353,7 +313,9 @@ class ClassicMarket(object):
         return self._transactionNum
         
     def getCanceledTransactionNum(self):
-        return self._canceledTransactionNum
+        # now, the length of order list is the orders which should be canceled if time out (time slot becomes maxium)
+        return len(self._OrderList)
 
     def getTotallyFailedTransactionNum(self):
-        return self._totallyFailedTransactionNum
+        # failed transaction = all orders remained in Orderlist - orders in orderlist which have been approached
+        return len(self._OrderList) - len(self._ChangedOrderList)

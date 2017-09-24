@@ -11,21 +11,6 @@ import matplotlib.mlab as mlab
 def sychronizeMarket(market, timeSlot):
     market.sychronize(timeSlot)
 
-# issue a new smart token
-initIssue = 3000000
-CRR = 0.2
-KennyCoin = Smartcoin(name='Kenny',reservetokenName='ETH',initCRR=0.2, initPrice=1,initIssueNum=initIssue)
-
-# create two different markets
-MyBancorMarket = BancorMarket(smartToken = KennyCoin)
-
-'''
-TimeSlotNum = 1000
-bouncingInterval = 200
-bouncingRange = 10.0
-custNum = 2000
-sigma = 1
-'''
 TimeSlotNum = 1000
 for bouncingInterval in [50, 200]:
     for bouncingRange in [5.0, 10.0, 20.0]:
@@ -43,8 +28,15 @@ for bouncingInterval in [50, 200]:
 
                 for mySeed in mySeeds:
                     np.random.seed(mySeed)
-                    myfw = open('Result/Bancor/T-'+str(TimeSlotNum)+'BI-'+str(bouncingInterval)+
-                        'BG-'+str(bouncingRange)+'CN-'+str(custNum)+'Sig-'+str(sigma)+'Seed-'+str(mySeed)+'.txt', 'w')
+                    # issue a new smart token
+                    initIssue = 3000000
+                    CRR = 0.2
+                    KennyCoin = Smartcoin(name='Kenny',reservetokenName='ETH',initCRR=0.2, initPrice=1,initIssueNum=initIssue)
+
+                    # create two different markets
+                    MyBancorMarket = BancorMarket(smartToken = KennyCoin)
+
+                    print 'T:',bouncingInterval, 'R:', bouncingRange, 'Nc:', custNum, 'sig:', sigma, 'seed:', mySeed, 'processing...'
 
                     '''
                     First of all, we initialize the customer's tokenBalance and reserveBalance 
@@ -102,68 +94,69 @@ for bouncingInterval in [50, 200]:
                             else:
                                 custList[i].changeValuation(custValuation_list[i])
 
+                        '''
+                        In every time slot, record the information of this time slot in the market, 
+                            such as Price, transactionNum and cancled Tx Num of this time slot
+                        '''
                         priceTracker.append(KennyCoin.getPrice())
                         txTracker.append(MyBancorMarket.getTransactionNum())
                         canceledTxTracker.append(MyBancorMarket.getCanceledTransactionNum())
 
                         # show some information in terminal
-                        print ('In time slot:'+str(j)+' | '+str(MyBancorMarket.getTransactionNum())+
-                            ' happens. And '+str(MyBancorMarket.getCanceledTransactionNum())+' transactions are canceled.')
-                        myfw.write(str(j)+'\t'+str(MyBancorMarket.getTransactionNum())+'\t'+
-                                    str(MyBancorMarket.getCanceledTransactionNum())+'\n')
-                    myfw.close()
+                        # print ('In time slot:'+str(j)+' | '+str(MyBancorMarket.getTransactionNum())+
+                        #     ' happens. And '+str(MyBancorMarket.getCanceledTransactionNum())+' transactions are canceled.')
 
-                    '''Plotting'''
+                    # '''Plotting'''
 
-                    # Figure about price changing
-                    pricePlot = []
-                    myX_P = []
-                    for j in range(TimeSlotNum):
-                        pricePlot.append(priceTracker[j])
-                        myX_P.append(j)
-                    x_P = np.asarray(myX_P)
-                    y_P = np.asarray(pricePlot)
-                    plt.plot(x_P, y_P, 'o-',color = 'navy', alpha = 0.8)
-                    plt.title('Price Change For Bancor Market',fontsize = 25)
-                    plt.xlabel('Time Slot #',fontsize = 15)
-                    plt.ylabel('Price of Smart Token', fontsize = 15)
-                    plt.savefig('Figures/Bancor/Price-'+str(TimeSlotNum)+'BI-'+str(bouncingInterval)+
-                        'BG-'+str(bouncingRange)+'CN-'+str(custNum)+'Sig-'+str(sigma)+'Seed-'+str(mySeed)+'.pdf', bbox_inches='tight')
-                    plt.close()
+                    # # Figure about price changing
+                    # pricePlot = []
+                    # myX_P = []
+                    # for j in range(TimeSlotNum):
+                    #     pricePlot.append(priceTracker[j])
+                    #     myX_P.append(j)
+                    # x_P = np.asarray(myX_P)
+                    # y_P = np.asarray(pricePlot)
+                    # plt.plot(x_P, y_P, 'o-',color = 'navy', alpha = 0.8)
+                    # plt.title('Price Change For Bancor Market',fontsize = 25)
+                    # plt.xlabel('Time Slot #',fontsize = 15)
+                    # plt.ylabel('Price of Smart Token', fontsize = 15)
+                    # plt.savefig('Figures/Bancor/Price-'+str(TimeSlotNum)+'BI-'+str(bouncingInterval)+
+                    #     'BG-'+str(bouncingRange)+'CN-'+str(custNum)+'Sig-'+str(sigma)+'Seed-'+str(mySeed)+'.pdf', bbox_inches='tight')
+                    # plt.close()
 
-                    # Figure about transactions
-                    txPlot = []
-                    myX_T = []
-                    for j in range(TimeSlotNum):
-                        txPlot.append(txTracker[j])
-                        myX_T.append(j)
+                    # # Figure about transactions
+                    # txPlot = []
+                    # myX_T = []
+                    # for j in range(TimeSlotNum):
+                    #     txPlot.append(txTracker[j])
+                    #     myX_T.append(j)
 
-                    x_T = np.asarray(myX_T)
-                    y_T = np.asarray(txPlot)
-                    plt.plot(x_T, y_T, 'o-',color = 'navy', alpha = 0.8)
-                    plt.title('Transaction Num For Bancor Market',fontsize = 25)
-                    plt.xlabel('Time Slot #',fontsize = 15)
-                    plt.ylabel('Transaction #', fontsize = 15)
-                    plt.savefig('Figures/Bancor/Transactions-'+str(TimeSlotNum)+'BI-'+str(bouncingInterval)+
-                        'BG-'+str(bouncingRange)+'CN-'+str(custNum)+'Sig-'+str(sigma)+'Seed-'+str(mySeed)+'.pdf', bbox_inches='tight')
-                    plt.close()
+                    # x_T = np.asarray(myX_T)
+                    # y_T = np.asarray(txPlot)
+                    # plt.plot(x_T, y_T, 'o-',color = 'navy', alpha = 0.8)
+                    # plt.title('Transaction Num For Bancor Market',fontsize = 25)
+                    # plt.xlabel('Time Slot #',fontsize = 15)
+                    # plt.ylabel('Transaction #', fontsize = 15)
+                    # plt.savefig('Figures/Bancor/Transactions-'+str(TimeSlotNum)+'BI-'+str(bouncingInterval)+
+                    #     'BG-'+str(bouncingRange)+'CN-'+str(custNum)+'Sig-'+str(sigma)+'Seed-'+str(mySeed)+'.pdf', bbox_inches='tight')
+                    # plt.close()
 
-                    # Figure about canceled transactions
-                    canceledTxPlot = []
-                    myX_C = []
-                    for j in range(TimeSlotNum):
-                        canceledTxPlot.append(canceledTxTracker[j])
-                        myX_C.append(j)
+                    # # Figure about canceled transactions
+                    # canceledTxPlot = []
+                    # myX_C = []
+                    # for j in range(TimeSlotNum):
+                    #     canceledTxPlot.append(canceledTxTracker[j])
+                    #     myX_C.append(j)
 
-                    x_C = np.asarray(myX_C)
-                    y_C = np.asarray(canceledTxPlot)
-                    plt.plot(x_C, y_C, 'o-',color = 'navy', alpha = 0.8)
-                    plt.title('Canceled Transaction Num For Bancor Market',fontsize = 25)
-                    plt.xlabel('Time Slot #',fontsize = 15)
-                    plt.ylabel('Canceled Transaction #', fontsize = 15)
-                    plt.savefig('Figures/Bancor/CanceledTx-'+str(TimeSlotNum)+'BI-'+str(bouncingInterval)+
-                        'BG-'+str(bouncingRange)+'CN-'+str(custNum)+'Sig-'+str(sigma)+'Seed-'+str(mySeed)+'.pdf', bbox_inches='tight')
-                    plt.close()
+                    # x_C = np.asarray(myX_C)
+                    # y_C = np.asarray(canceledTxPlot)
+                    # plt.plot(x_C, y_C, 'o-',color = 'navy', alpha = 0.8)
+                    # plt.title('Canceled Transaction Num For Bancor Market',fontsize = 25)
+                    # plt.xlabel('Time Slot #',fontsize = 15)
+                    # plt.ylabel('Canceled Transaction #', fontsize = 15)
+                    # plt.savefig('Figures/Bancor/CanceledTx-'+str(TimeSlotNum)+'BI-'+str(bouncingInterval)+
+                    #     'BG-'+str(bouncingRange)+'CN-'+str(custNum)+'Sig-'+str(sigma)+'Seed-'+str(mySeed)+'.pdf', bbox_inches='tight')
+                    # plt.close()
 
                     # File about transactions counting
                     fw_trax = open('Result/Bancor/Tx_T-'+str(TimeSlotNum)+'BI-'+str(bouncingInterval)+

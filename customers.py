@@ -35,9 +35,6 @@ class Customer(object):
         print 'smartToken Name:', self._smartToken._Name, '| valuation:', self._valuation
         print 'reserveBalance:', self._reserveBalance, '| tokenBalance:', self._tokenBalance
 
-    # def SetTimeSlot(self, timeslot):
-    #     self._timeslot = timeslot
-
     def getReserveBalance(self):
         return self._reserveBalance
 
@@ -64,25 +61,29 @@ class Customer(object):
     def changeValuation(self, newValuation):
         self._valuation = newValuation
         '''
-        Cancel the previous order in market's orderlist.
-        If the previous order succeeds in the market, this function call will cancel nothing.
+        In Bancor Market, cancelOrder function means no extra operation, and always return True.
+            as the order launched by customer will be finished or passed for changing properties of Bancor market.
+        While in Classic Market, cancelOrder means
         '''
-        self._market.cancelOrder(self)
-        '''
-        What getCurrentPrice() returns in Bancor market should be different with the real time price of Smart Token. 
-        This is because since every time slot many customers come into the market simultaneously, 
-            what they see is the final price at the end of previous time slot.
-        '''
-        if self._valuation > self._market.getCurrentPrice() and self._reserveBalance > 0:
-            # XXX issues a buy order 
-            self._market.buy(self, self._reserveBalance) # all-in policy
-            # self._market.buy(self, int(0.5 * self._reserveBalance)) # half-in policy
-        elif self._valuation < self._market.getCurrentPrice() and self._tokenBalance > 0:
-            # XXX issue a sell order
-            self._market.sell(self, self._tokenBalance) # all-in policy
-            # self._market.sell(self, int(0.5 * self._tokenBalance)) # half-in policy
+        if self._market.ifFinishedOrder(self):
+            '''
+            What getCurrentPrice() returns in Bancor market should be different with the real time price of Smart Token. 
+            This is because since every time slot many customers come into the market simultaneously, 
+                what they see is the final price at the end of previous time slot.
+            '''
+            if self._valuation > self._market.getCurrentPrice() and self._reserveBalance > 0:
+                # XXX issues a buy order 
+                self._market.buy(self, self._reserveBalance) # all-in policy
+                # self._market.buy(self, int(0.5 * self._reserveBalance)) # half-in policy
+            elif self._valuation < self._market.getCurrentPrice() and self._tokenBalance > 0:
+                # XXX issue a sell order
+                self._market.sell(self, self._tokenBalance) # all-in policy
+                # self._market.sell(self, int(0.5 * self._tokenBalance)) # half-in policy
+            else:
+                # nothing to do
+                pass
         else:
-            # nothing to do
+            # nothing to do, since the order is remained in Classic Market without being touched.
             pass
 
 def cust_main():
@@ -114,8 +115,6 @@ def cust_main():
     Alice.printInfo()
     Bob.printInfo()
     Alice.changeValuation(1.4)
-    print market2.getCanceledTransactionNum(), 'being canceled.'
-    print market2.getTotallyFailedTransactionNum(), 'Totally failed.'
 
 if __name__ == '__main__':
     cust_main()

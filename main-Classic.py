@@ -10,22 +10,6 @@ import matplotlib.mlab as mlab
 # the Classic Market has to be sychronized in every different time slot
 def sychronizeMarket(market, timeSlot):
     market.sychronize(timeSlot)
-
-# issue a new smart token
-initIssue = 3000000
-CRR = 0.2
-KennyCoin = Smartcoin(name='Kenny',reservetokenName='ETH',initCRR=0.2, initPrice=1,initIssueNum=initIssue)
-
-# create two different markets
-MyClassicMarket = ClassicMarket(smartToken = KennyCoin)
-
-'''
-TimeSlotNum = 1000
-bouncingInterval = 200
-bouncingRange = 10.0
-custNum = 2000
-sigma = 0.01
-'''
 TimeSlotNum = 1000
 for bouncingInterval in [50, 200]:
     for bouncingRange in [5.0, 10.0, 20.0]:
@@ -39,8 +23,15 @@ for bouncingInterval in [50, 200]:
 
                 for mySeed in mySeeds:
                     np.random.seed(mySeed)
-                    myfw = open('Result/Classic/T-'+str(TimeSlotNum)+'BI-'+str(bouncingInterval)+
-                        'BG-'+str(bouncingRange)+'CN-'+str(custNum)+'Sig-'+str(sigma)+'Seed-'+str(mySeed)+'.txt', 'w')
+                    # issue a new smart token
+                    initIssue = 3000000
+                    CRR = 0.2
+                    KennyCoin = Smartcoin(name='Kenny',reservetokenName='ETH',initCRR=0.2, initPrice=1,initIssueNum=initIssue)
+
+                    # create two different markets
+                    MyClassicMarket = ClassicMarket(smartToken = KennyCoin)
+
+                    print 'T:',bouncingInterval, 'R:', bouncingRange, 'Nc:', custNum, 'sig:', sigma, 'seed:', mySeed, 'processing...'
 
                     '''
                     First of all, we initialize the customer's tokenBalance and reserveBalance 
@@ -97,80 +88,80 @@ for bouncingInterval in [50, 200]:
                                 custList[i].changeValuation(0.001*currentMarketPrice)
                             else:
                                 custList[i].changeValuation(custValuation_list[i])
-
+                        '''
+                        In every time slot, record the information of this time slot in the market, 
+                            such as transactionNum, cancled Tx Num and failed Tx Num of this time slot
+                        '''
                         txTracker.append(MyClassicMarket.getTransactionNum())
                         canceledTxTracker.append(MyClassicMarket.getCanceledTransactionNum())
                         failedTxTracker.append(MyClassicMarket.getTotallyFailedTransactionNum())
 
                         # show some information in terminal
                         print ('In time slot:'+str(j)+' | '+str(MyClassicMarket.getTransactionNum())+
-                            ' happens. And '+str(MyClassicMarket.getCanceledTransactionNum())+' transactions are canceled. | And '+
-                            str(MyClassicMarket.getTotallyFailedTransactionNum())+' totally failed.')
-                        myfw.write(str(j)+'\t'+str(MyClassicMarket.getTransactionNum())+'\t'+
-                                    str(MyClassicMarket.getCanceledTransactionNum())+'\t'+
-                                    str(MyClassicMarket.getTotallyFailedTransactionNum())+'\n')
-                    myfw.close()
+                            ' Txs happens. '+str(MyClassicMarket.getCanceledTransactionNum())+' txs are remained in Market. | '+
+                            str(MyClassicMarket.getTotallyFailedTransactionNum())+' are totally ignored in Market.')
+
+                    LastCancelNum = canceledTxTracker[-1]
+                    LastFailNum = failedTxTracker[-1]
                     
                     '''Plotting'''
+                    # # Figure about transactions
+                    # txPlot = []
+                    # myX_T = []
+                    # for j in range(TimeSlotNum):
+                    #     txPlot.append(txTracker[j])
+                    #     myX_T.append(j)
 
-                    # Figure about transactions
-                    txPlot = []
-                    myX_T = []
-                    for j in range(TimeSlotNum):
-                        txPlot.append(txTracker[j])
-                        myX_T.append(j)
+                    # x_T = np.asarray(myX_T)
+                    # y_T = np.asarray(txPlot)
+                    # plt.plot(x_T, y_T, 'o-',color = 'navy', alpha = 0.8)
+                    # plt.title('Transaction Num For Classic Market',fontsize = 25)
+                    # plt.xlabel('Time Slot #',fontsize = 15)
+                    # plt.ylabel('Transaction #', fontsize = 15)
+                    # plt.savefig('Figures/Classic/Transactions-'+str(TimeSlotNum)+'BI-'+str(bouncingInterval)+
+                    #     'BG-'+str(bouncingRange)+'CN-'+str(custNum)+'Sig-'+str(sigma)+'Seed-'+str(mySeed)+'.pdf', bbox_inches='tight')
+                    # plt.close()
 
-                    x_T = np.asarray(myX_T)
-                    y_T = np.asarray(txPlot)
-                    plt.plot(x_T, y_T, 'o-',color = 'navy', alpha = 0.8)
-                    plt.title('Transaction Num For Classic Market',fontsize = 25)
-                    plt.xlabel('Time Slot #',fontsize = 15)
-                    plt.ylabel('Transaction #', fontsize = 15)
-                    plt.savefig('Figures/Classic/Transactions-'+str(TimeSlotNum)+'BI-'+str(bouncingInterval)+
-                        'BG-'+str(bouncingRange)+'CN-'+str(custNum)+'Sig-'+str(sigma)+'Seed-'+str(mySeed)+'.pdf', bbox_inches='tight')
-                    plt.close()
+                    # # Figure about canceled transactions
+                    # canceledTxPlot = []
+                    # myX_C = []
+                    # for j in range(TimeSlotNum):
+                    #     canceledTxPlot.append(canceledTxTracker[j])
+                    #     myX_C.append(j)
 
-                    # Figure about canceled transactions
-                    canceledTxPlot = []
-                    myX_C = []
-                    for j in range(TimeSlotNum):
-                        canceledTxPlot.append(canceledTxTracker[j])
-                        myX_C.append(j)
+                    # x_C = np.asarray(myX_C)
+                    # y_C = np.asarray(canceledTxPlot)
+                    # plt.plot(x_C, y_C, 'o-',color = 'navy', alpha = 0.8)
+                    # plt.title('Canceled Transaction Num For Classic Market',fontsize = 25)
+                    # plt.xlabel('Time Slot #',fontsize = 15)
+                    # plt.ylabel('Canceled Transaction #', fontsize = 15)
+                    # plt.savefig('Figures/Classic/CanceledTx-'+str(TimeSlotNum)+'BI-'+str(bouncingInterval)+
+                    #     'BG-'+str(bouncingRange)+'CN-'+str(custNum)+'Sig-'+str(sigma)+'Seed-'+str(mySeed)+'.pdf', bbox_inches='tight')
+                    # plt.close()
 
-                    x_C = np.asarray(myX_C)
-                    y_C = np.asarray(canceledTxPlot)
-                    plt.plot(x_C, y_C, 'o-',color = 'navy', alpha = 0.8)
-                    plt.title('Canceled Transaction Num For Classic Market',fontsize = 25)
-                    plt.xlabel('Time Slot #',fontsize = 15)
-                    plt.ylabel('Canceled Transaction #', fontsize = 15)
-                    plt.savefig('Figures/Classic/CanceledTx-'+str(TimeSlotNum)+'BI-'+str(bouncingInterval)+
-                        'BG-'+str(bouncingRange)+'CN-'+str(custNum)+'Sig-'+str(sigma)+'Seed-'+str(mySeed)+'.pdf', bbox_inches='tight')
-                    plt.close()
-
-                    # Figure about failed transactions
-                    failedTxPlot = []
-                    myX_F = []
-                    for j in range(TimeSlotNum):
-                        failedTxPlot.append(failedTxTracker[j])
-                        myX_F.append(j)
-
-                    x_F = np.asarray(myX_F)
-                    y_F = np.asarray(failedTxPlot)
-                    plt.plot(x_F, y_F, 'o-',color = 'navy', alpha = 0.8)
-                    plt.title('Failed Transaction Num For Classic Market',fontsize = 25)
-                    plt.xlabel('Time Slot #',fontsize = 15)
-                    plt.ylabel('Failed Transaction #', fontsize = 15)
-                    plt.savefig('Figures/Classic/FailedTx-Seed-'+str(TimeSlotNum)+'BI-'+str(bouncingInterval)+
-                        'BG-'+str(bouncingRange)+'CN-'+str(custNum)+'Sig-'+str(sigma)+'Seed-'+str(mySeed)+'.pdf', bbox_inches='tight')
-                    plt.close()
+                    # # Figure about failed transactions
+                    # failedTxPlot = []
+                    # myX_F = []
+                    # for j in range(TimeSlotNum):
+                    #     failedTxPlot.append(failedTxTracker[j])
+                    #     myX_F.append(j)
+                    # x_F = np.asarray(myX_F)
+                    # y_F = np.asarray(failedTxPlot)
+                    # plt.plot(x_F, y_F, 'o-',color = 'navy', alpha = 0.8)
+                    # plt.title('Failed Transaction Num For Classic Market',fontsize = 25)
+                    # plt.xlabel('Time Slot #',fontsize = 15)
+                    # plt.ylabel('Failed Transaction #', fontsize = 15)
+                    # plt.savefig('Figures/Classic/FailedTx-Seed-'+str(TimeSlotNum)+'BI-'+str(bouncingInterval)+
+                    #     'BG-'+str(bouncingRange)+'CN-'+str(custNum)+'Sig-'+str(sigma)+'Seed-'+str(mySeed)+'.pdf', bbox_inches='tight')
+                    # plt.close()
 
                     fw_trax = open('Result/Classic/Tx_T-'+str(TimeSlotNum)+'BI-'+str(bouncingInterval)+
                         'BG-'+str(bouncingRange)+'CN-'+str(custNum)+'Sig-'+str(sigma)+'Seed-'+str(mySeed)+'.txt', 'w')
-                    fw_trax.write('All_Tx:'+'\t'+str(sum(txTracker))+'\tCanceled:'+'\t'+str(sum(canceledTxTracker))
-                        +'\tTotally_failed:'+'\t'+str(sum(failedTxTracker)))
+                    fw_trax.write('All_Tx:'+'\t'+str(sum(txTracker))+'\tFinal_Canceled:'+'\t'+str(LastCancelNum)
+                        +'\tFinal_failed:'+'\t'+str(LastFailNum))
                     All_TXNUM += sum(txTracker)
-                    ALL_CANCELEDNUM += sum(canceledTxTracker)
-                    ALL_FAILEDTXNUM += sum(failedTxTracker)
+                    ALL_CANCELEDNUM += LastCancelNum
+                    ALL_FAILEDTXNUM += LastFailNum
                     fw_trax.close()
 
 
