@@ -171,7 +171,7 @@ for bouncingInterval in [50, 200]:
                 Canceled_TX_Ratio = avg_ALL_CANCELEDNUM / avg_All_TXNUM
                 Failed_TX_Ratio = avg_All_FAILEDNUM / avg_All_TXNUM
 
-                fw_statistic = open('Figures/Classic/Statistic-'+str(TimeSlotNum)+'BI-'+str(bouncingInterval)+
+                fw_statistic = open('Figures/Classic/'+str(bouncingInterval)+
                         'BG-'+str(bouncingRange)+'CN-'+str(custNum)+'Sig-'+str(sigma)+'.txt','w')
                 fw_statistic.write(str(avg_All_TXNUM)+'\t'+str(avg_ALL_CANCELEDNUM)+'\t'+str(avg_All_FAILEDNUM)
                     +'\t'+str(Canceled_TX_Ratio)+'\t'+str(Failed_TX_Ratio))

@@ -1,0 +1,2 @@
+All Tx Num  All Cancel Num  Cancel Rate Slip Num    Medium Slip Num Huge Slip Num   Slip Rate   Medium Slip rate    Huge Slip Rate
+250425.5	6357.3	0.0253859930398	513.1	17.9	0.0	0.5131	0.0179	0.0

@@ -200,7 +200,7 @@ for bouncingInterval in [50, 200]:
                 MediumSlip_Ratio = avg_ALL_MEDIUMSLIP / float(TimeSlotNum)
                 HugeSlip_Ratio = avg_ALL_HUGESLIP / float(TimeSlotNum)
 
-                fw_statistic = open('Figures/Bancor/Statistic-'+str(TimeSlotNum)+'BI-'+str(bouncingInterval)+
+                fw_statistic = open('Figures/Bancor/'+str(bouncingInterval)+
                         'BG-'+str(bouncingRange)+'CN-'+str(custNum)+'Sig-'+str(sigma)+'.txt','w')
                 fw_statistic.write(str(avg_All_TXNUM)+'\t'+str(avg_ALL_CANCELEDNUM)+'\t'+str(Canceled_TX_Ratio)
                     +'\t'+str(avg_ALL_SLIP)+'\t'+str(avg_ALL_MEDIUMSLIP)+'\t'+str(avg_ALL_HUGESLIP)+'\t'

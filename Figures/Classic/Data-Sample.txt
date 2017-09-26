@@ -1,0 +1,2 @@
+All Tx Num  Cancel Num  Fail Num    Cancel Rate Failed Rate
+120661.1	125.6	112.4	0.0010409319988	0.000931534686821
