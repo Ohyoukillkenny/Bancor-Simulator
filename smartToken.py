@@ -22,7 +22,7 @@ class Smartcoin(object):
         print '---------'
         print 'NAME:', self._Name, '| RESERVE NAME:', self._ReservetokenName, 'CRR:', self._CRR
         print 'PRICE:',self._Price
-        print 'SUPPLY:', self._Supply, '| RESERVE BALANCE:', self._ReserveBalance
+        print 'SUPPLY:', int(self._Supply), '| RESERVE BALANCE:', int(self._ReserveBalance)
 
     def saveInfo(self, fw):
         fw.write('---------\n')
@@ -73,16 +73,16 @@ def smarttoken_main():
     This part is consistent with the example offered by white paper, 
         which shows our codes realize the idea of Bancor according to its white paper.
     '''
-    BNTCoin = Smartcoin(name='BNT',reservetokenName='ETH',initCRR=0.2, initPrice=1,initIssueNum=300000)
+    BNTCoin = Smartcoin(name='BNT',reservetokenName='ETH',initCRR=0.5, initPrice=1,initIssueNum=800000)
     BNTCoin.printInfo()
-    print BNTCoin.destroying(300)
-    print BNTCoin.purchasing(300)
-    print BNTCoin.purchasing(700)
+    print BNTCoin.purchasing(400000)
     BNTCoin.printInfo()
-    print BNTCoin.destroying(1302)
+    BNTCoin.destroying(731371/2)
+    print '~ ~ ~ ~ ~ ~ ~ ~ ~'
+    print 365685/2 + BNTCoin.purchasing(433578/2)
+    print 433578/2 + BNTCoin.destroying(365685/2)
     BNTCoin.printInfo()
-    print BNTCoin.purchasing(100)
-    BNTCoin.printInfo()
+
 
 if __name__ == '__main__':
     smarttoken_main()

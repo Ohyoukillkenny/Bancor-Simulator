@@ -28,8 +28,8 @@ class BancorMarket(object):
         self._canceledTransactionNum = 0
 
     # what getCurrentPrice() returns in Bancor market should be different with the real time price of Smart Token. 
-    # This is because since every time slot many customers come into the market simultaneously, 
-    # what they see is the final price at the end of previous time slot
+    # This is because since in every time slot many customers come into the market simultaneously, 
+    # what they see is the final price after nearest transaction
     def getCurrentPrice(self):
         if self._time in self._timeList:
             return self._CurrentPrice
@@ -49,7 +49,7 @@ class BancorMarket(object):
         self._transactionNum = self._transactionNum + 1
         if Transaction_Value < 0:
             print '** ERROR, cannot buy with negative number of reserveToken'
-        if not isinstance(Transaction_Value,int):
+        if not isinstance(Transaction_Value, int):
             print '** ERROR, should use integer number of reserveTokens to buy', Transaction_Value
         if cust.getValuation() >= self._smartToken.getPrice():
             receivedSmartTokens = self._smartToken.purchasing(Transaction_Value)

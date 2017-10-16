@@ -24,9 +24,9 @@ for bouncingInterval in [50, 200]:
                 for mySeed in mySeeds:
                     np.random.seed(mySeed)
                     # issue a new smart token
-                    initIssue = 3000000
-                    CRR = 0.2
-                    KennyCoin = Smartcoin(name='Kenny',reservetokenName='ETH',initCRR=0.2, initPrice=1,initIssueNum=initIssue)
+                    initIssue = 800000
+                    CRR = 0.5
+                    KennyCoin = Smartcoin(name='Kenny',reservetokenName='ETH',initCRR=CRR, initPrice=1,initIssueNum=initIssue)
 
                     # create two different markets
                     MyClassicMarket = ClassicMarket(smartToken = KennyCoin)
@@ -37,22 +37,19 @@ for bouncingInterval in [50, 200]:
                     First of all, we initialize the customer's tokenBalance and reserveBalance 
                     by Gaussian distributed random number (mu = 200, sigma = 0.1)
                     '''
-                    custInitReserveBalance_mu = 200
-                    custInitTokenBalance_mu = 200
-                    custInitReserveBalance_list = np.random.normal(custInitReserveBalance_mu, 0.1, custNum) # 0.5 is sigma
-                    custInitTokenBalance_list = np.random.normal(custInitTokenBalance_mu, 0.1, custNum) # 0.5 is sigma
+                    custInitReserveBalance = 200
+                    custInitTokenBalance = 200
 
-                    if sum(custInitTokenBalance_list) > (initIssue * (1 - CRR)):
+                    if custInitTokenBalance * custNum > (initIssue * (1 - CRR)):
                         print 'ERROR, too many init smart tokens holding by customers.'
                         sys.exit(0)
-
                     custList = []
                     # here we name single customer as Joe. And every customer is initialized with 
                     # random value of token balance as well as reserve balance.
                     for i in range(custNum):
                         Joe = Customer(smartToken = KennyCoin, market = MyClassicMarket, 
-                                        tokenBalance = int(custInitTokenBalance_list[i]), 
-                                        reserveBalance = int(custInitReserveBalance_list[i]))
+                                        tokenBalance = int(custInitTokenBalance), 
+                                        reserveBalance = int(custInitReserveBalance))
                         custList.append(Joe)
 
                     # cashTracker records custmers' cash
@@ -97,9 +94,9 @@ for bouncingInterval in [50, 200]:
                         failedTxTracker.append(MyClassicMarket.getTotallyFailedTransactionNum())
 
                         # show some information in terminal
-                        print ('In time slot:'+str(j)+' | '+str(MyClassicMarket.getTransactionNum())+
-                            ' Txs happens. '+str(MyClassicMarket.getCanceledTransactionNum())+' txs are remained in Market. | '+
-                            str(MyClassicMarket.getTotallyFailedTransactionNum())+' are totally ignored in Market.')
+                        # print ('In time slot:'+str(j)+' | '+str(MyClassicMarket.getTransactionNum())+
+                        #     ' Txs happens. '+str(MyClassicMarket.getCanceledTransactionNum())+' txs are remained in Market. | '+
+                        #     str(MyClassicMarket.getTotallyFailedTransactionNum())+' are totally ignored in Market.')
 
                     LastCancelNum = canceledTxTracker[-1]
                     LastFailNum = failedTxTracker[-1]
@@ -116,7 +113,7 @@ for bouncingInterval in [50, 200]:
                     # y_T = np.asarray(txPlot)
                     # plt.plot(x_T, y_T, 'o-',color = 'navy', alpha = 0.8)
                     # plt.title('Transaction Num For Classic Market',fontsize = 25)
-                    # plt.xlabel('Time Slot #',fontsize = 15)
+                    # plt.xlabel('t',fontsize = 15)
                     # plt.ylabel('Transaction #', fontsize = 15)
                     # plt.savefig('Figures/Classic/Transactions-'+str(TimeSlotNum)+'BI-'+str(bouncingInterval)+
                     #     'BG-'+str(bouncingRange)+'CN-'+str(custNum)+'Sig-'+str(sigma)+'Seed-'+str(mySeed)+'.pdf', bbox_inches='tight')
@@ -171,7 +168,7 @@ for bouncingInterval in [50, 200]:
                 Canceled_TX_Ratio = avg_ALL_CANCELEDNUM / avg_All_TXNUM
                 Failed_TX_Ratio = avg_All_FAILEDNUM / avg_All_TXNUM
 
-                fw_statistic = open('Figures/Classic/'+str(bouncingInterval)+
+                fw_statistic = open('Figures/Classic/Statistic-'+str(TimeSlotNum)+'BI-'+str(bouncingInterval)+
                         'BG-'+str(bouncingRange)+'CN-'+str(custNum)+'Sig-'+str(sigma)+'.txt','w')
                 fw_statistic.write(str(avg_All_TXNUM)+'\t'+str(avg_ALL_CANCELEDNUM)+'\t'+str(avg_All_FAILEDNUM)
                     +'\t'+str(Canceled_TX_Ratio)+'\t'+str(Failed_TX_Ratio))

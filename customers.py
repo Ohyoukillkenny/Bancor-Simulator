@@ -73,10 +73,12 @@ class Customer(object):
             '''
             if self._valuation > self._market.getCurrentPrice() and self._reserveBalance > 0:
                 # XXX issues a buy order 
-                self._market.buy(self, self._reserveBalance) 
-            elif self._valuation < self._market.getCurrentPrice() and self._tokenBalance > 0:
+                self._market.buy(self, self._reserveBalance) # all-in policy
+                # self._market.buy(self, int(0.5 * self._reserveBalance)) # half-in policy
+            elif self._valuation < self._market.getCurrentPrice() and self._tokenBalance> 0:
                 # XXX issue a sell order
-                self._market.sell(self, self._tokenBalance)
+                self._market.sell(self, self._tokenBalance) # all-in policy
+                # self._market.sell(self, int(0.5 * self._tokenBalance)) # half-in policy
             else:
                 # nothing to do
                 pass
