@@ -73,7 +73,10 @@ for bouncingInterval in [50, 200]:
                             of customers when the good or bad news comes into market on a certain time slot,
                             which is divided by bouncing interval.
                             '''
-                            valuation_mu = random.uniform(currentMarketPrice/bouncingRange, currentMarketPrice*bouncingRange)
+                            if bool(random.getrandbits(1)):
+                                valuation_mu = random.uniform(currentMarketPrice/bouncingRange, currentMarketPrice)
+                            else:
+                                valuation_mu = random.uniform(currentMarketPrice, currentMarketPrice*bouncingRange)
                         else:
                             valuation_mu = currentMarketPrice
 
