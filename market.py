@@ -4,46 +4,32 @@ from customers import *
 class BancorMarket(object):
     def __init__(self, smartToken):
         self._smartToken = smartToken
-        # Order format: [cust, transactionValue, buy_or_sell]
+        '''Order format: [cust, transactionValue, buy_or_sell label]'''
         self._OrderList = []
-        self._CurrentPrice = smartToken.getInitPrice()
-        self._timeList = []
-        self._time = 0
 
+        '''_Buy and _SELL are labels to distinguish buy orders and sell orders'''
         self._BUY = 1
         self._SELL = -1
-        self._ERROR = -2
 
-        # parameters for plotting: txNum and canceledTxNum are reset to 0 in the beginning of every time slot:
+        '''parameters for plotting: txNum and canceledTxNum are reset to 0 in the beginning of every time slot:'''
         self._transactionNum = 0
         self._canceledTransactionNum = 0
 
     '''
-    To tell market new time slot is coming, 
-        and the currentPrice market offers to customers should be different from the previous one.
+    sychronize function resets _transactionNum and _canceledTransactionNum to 0
     '''
-    def sychronize(self, timeSlot):
-        self._time = timeSlot
+    def sychronize(self):
         self._transactionNum = 0
         self._canceledTransactionNum = 0
 
-    # what getCurrentPrice() returns in Bancor market should be different with the real time price of Smart Token. 
-    # This is because since in every time slot many customers come into the market simultaneously, 
-    # what they see is the final price after nearest transaction
-    def getCurrentPrice(self):
-        if self._time in self._timeList:
-            return self._CurrentPrice
-        else:
-            self._timeList.append(self._time)
-            self._CurrentPrice = self._smartToken.getPrice()
-            return self._CurrentPrice
-
+    '''
+    By Bancor Market's property, every launched order, which is not canceled by customer, can be finished by market.
+    '''
     def ifFinishedOrder(self, cust):
         return True
 
     '''
-    use #Transaction_Value reserveTokens to buy smartTokens -> smartToken price increase
-    call smartTokens.purchasing() function
+    Use reserveTokens with the number of Transaction_Value to buy smartTokens.
     '''
     def buy(self, cust, Transaction_Value):
         self._transactionNum = self._transactionNum + 1
@@ -61,8 +47,7 @@ class BancorMarket(object):
             
         
     '''
-    sell #Transaction_Value smartTokens to get reserveTokens -> smartToken price decrease
-    call smartTokens.destroying() function
+    Sell smartTokens with the number of Transaction_Value to get reserveTokens.
     '''
     def sell(self, cust, Transaction_Value):
         self._transactionNum = self._transactionNum + 1
@@ -78,10 +63,9 @@ class BancorMarket(object):
             # This order will be canceled, no extra operation.
             self._canceledTransactionNum += 1
 
-    # functions for plotting
+    # functions for statistic analysis
     def getTransactionNum(self):
         return self._transactionNum
-        
     def getCanceledTransactionNum(self):
         return self._canceledTransactionNum
 
@@ -98,30 +82,30 @@ In Classic Market, the price of smart token will not change, but the customers' 
 class ClassicMarket(object):
     def __init__(self, smartToken):
         self._smartToken = smartToken
-        # Order format: [cust, transactionValue, buy_or_sell]
+        '''Order format: [cust, transactionValue, buy_or_sell label]'''
         self._OrderList = []
-        self._CurrentPrice = smartToken.getInitPrice()
 
+        '''_Buy and _SELL are labels to distinguish buy orders and sell orders'''
         self._BUY = 1
         self._SELL = -1
-        self._ERROR = -2
 
-        # parameters for plotting:
+        '''Parameters for plotting'''
         self._transactionNum = 0
 
-        # Order format: [cust], record the orders being partially satisfied
+        '''Order format: [cust], record the orders being partially satisfied'''
         self._ChangedOrderList = []
 
 
     '''
-    Reset plotting parameters.
+    sychronize function resets _transactionNum and _canceledTransactionNum to 0
     '''
-    def sychronize(self, timeSlot = 0):
+    def sychronize(self):
         self._transactionNum = 0
 
-    def getCurrentPrice(self):
-        return self._CurrentPrice
-
+    '''
+    In classic market, customers transaction orders might be only partially fulfilled. 
+    We can call this "ifFinishedOrder" to see whether a certain customer's transaction order being fulfilled by market.
+    '''
     def ifFinishedOrder(self, cust):
         for i in range(len(self._OrderList)):
             # Order format: [cust, transactionValue, buy_or_sell]
@@ -131,7 +115,7 @@ class ClassicMarket(object):
         return True
 
     def updateOrderList(self, newOrder):
-        # newOrder: [cust, transactionValue, buy_or_sell]
+        '''newOrder: [cust, transactionValue, buy_or_sell]'''
         cust = newOrder[0]
         custValuation = cust.getValuation()
         transactionValue =  newOrder[1]
@@ -281,8 +265,7 @@ class ClassicMarket(object):
                 self._OrderList.append(newOrder)
 
     '''
-    use #Transaction_Value reserveTokens to buy smartTokens -> smartToken price increase
-    call smartTokens.purchasing() function
+    Use reserveTokens with the number of Transaction_Value to buy smartTokens.
     '''
     def buy(self, cust, Transaction_Value):
         if Transaction_Value < 0:
@@ -295,8 +278,7 @@ class ClassicMarket(object):
         self._transactionNum = self._transactionNum + 1
         
     '''
-    sell #Transaction_Value smartTokens to get reserveTokens -> smartToken price decrease
-    call smartTokens.destroying() function
+    Sell smartTokens with the number of Transaction_Value to get reserveTokens.
     '''
     def sell(self, cust, Transaction_Value):
         if Transaction_Value < 0:
@@ -308,14 +290,10 @@ class ClassicMarket(object):
         self.updateOrderList([cust, Transaction_Value, self._SELL])
         self._transactionNum = self._transactionNum + 1
 
-    # functions for plotting
+    # functions for statistic analysis
     def getTransactionNum(self):
         return self._transactionNum
-        
     def getCanceledTransactionNum(self):
-        # now, the length of order list is the orders which should be canceled if time out (time slot becomes maxium)
         return len(self._OrderList)
-
     def getTotallyFailedTransactionNum(self):
-        # failed transaction = all orders remained in Orderlist - orders in orderlist which have been approached
         return len(self._OrderList) - len(self._ChangedOrderList)
