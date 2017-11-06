@@ -1,0 +1,1 @@
+Slip:	533	Medium-slip:	31	Huge-slip:	0
